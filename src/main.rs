@@ -2,14 +2,48 @@ use eframe::egui;
 use star_backend::preprocessing::dem::RasterGrid;
 use star_backend::preprocessing::dem_batch::{TerrainExtractionReport, extract_terrain_batch};
 use star_backend::preprocessing::geotiff::{GeoTiffDem, load_geotiff};
-
 use std::f64::consts::PI;
 
-#[derive(PartialEq)]
+const BG: egui::Color32 = egui::Color32::from_rgb(5, 16, 28);
+const PANEL: egui::Color32 = egui::Color32::from_rgb(7, 23, 38);
+const PANEL_2: egui::Color32 = egui::Color32::from_rgb(12, 31, 48);
+const LINE: egui::Color32 = egui::Color32::from_rgb(28, 53, 72);
+const MUTED: egui::Color32 = egui::Color32::from_rgb(139, 161, 180);
+const GREEN: egui::Color32 = egui::Color32::from_rgb(126, 198, 111);
+
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Page {
     Overview,
     Terrain,
     Discovery,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Layer {
+    Elevation,
+    Hillshade,
+    Slope,
+    Roughness,
+    Curvature,
+}
+impl Layer {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Elevation => "Elevation model",
+            Self::Hillshade => "Hillshade",
+            Self::Slope => "Slope",
+            Self::Roughness => "Roughness",
+            Self::Curvature => "Curvature",
+        }
+    }
+    fn all() -> [Self; 5] {
+        [
+            Self::Elevation,
+            Self::Hillshade,
+            Self::Slope,
+            Self::Roughness,
+            Self::Curvature,
+        ]
+    }
 }
 
 struct StarApp {
@@ -18,40 +52,33 @@ struct StarApp {
     dem: Option<GeoTiffDem>,
     report: Option<TerrainExtractionReport>,
     error: Option<String>,
+    layer: Layer,
+    texture: Option<egui::TextureHandle>,
+    texture_layer: Option<Layer>,
+    selected: Option<(usize, usize)>,
+    zoom: f32,
+    pan: egui::Vec2,
+    show_grid: bool,
 }
-
 impl Default for StarApp {
     fn default() -> Self {
         Self {
-            page: Page::Overview,
+            page: Page::Terrain,
             radius: 2,
             dem: None,
             report: None,
             error: None,
+            layer: Layer::Hillshade,
+            texture: None,
+            texture_layer: None,
+            selected: None,
+            zoom: 1.0,
+            pan: egui::Vec2::ZERO,
+            show_grid: false,
         }
     }
 }
-
 impl StarApp {
-    fn metric(ui: &mut egui::Ui, name: &str, value: &str, subtitle: &str) {
-        egui::Frame::group(ui.style())
-            .inner_margin(egui::Margin::same(15))
-            .show(ui, |ui| {
-                ui.label(
-                    egui::RichText::new(name)
-                        .size(11.0)
-                        .color(egui::Color32::GRAY),
-                );
-                ui.add_space(5.0);
-                ui.label(egui::RichText::new(value).size(26.0).strong());
-                ui.label(
-                    egui::RichText::new(subtitle)
-                        .size(10.0)
-                        .color(egui::Color32::GRAY),
-                );
-            });
-    }
-
     fn load_file(&mut self) {
         if let Some(path) = rfd::FileDialog::new()
             .add_filter("GeoTIFF DEM", &["tif", "tiff"])
@@ -59,46 +86,40 @@ impl StarApp {
         {
             self.error = None;
             self.report = None;
-
             match load_geotiff(&path) {
                 Ok(dem) => {
                     self.dem = Some(dem);
+                    self.invalidate_map();
                 }
-                Err(error) => {
-                    self.error = Some(error);
-                }
+                Err(e) => self.error = Some(e),
             }
         }
     }
-
+    fn invalidate_map(&mut self) {
+        self.texture = None;
+        self.texture_layer = None;
+        self.selected = None;
+    }
     fn generate_demo(&mut self) {
-        let width = 96;
-        let height = 96;
-        let mut elevation = Vec::with_capacity(width * height);
-
-        for y in 0..height {
-            for x in 0..width {
-                let nx = x as f64 / width as f64;
-                let ny = y as f64 / height as f64;
-
-                let waves = 180.0 * (nx * PI * 4.0).sin() * (ny * PI * 3.0).cos();
-
-                let distance = (nx - 0.55).powi(2) + (ny - 0.48).powi(2);
-
-                let hill = 350.0 * (-distance * 75.0).exp();
-                let ridge = 90.0 * ((nx + ny) * PI * 5.0).sin();
-
-                elevation.push(1800.0 + waves + hill + ridge);
+        let (w, h) = (420usize, 300usize);
+        let mut z = Vec::with_capacity(w * h);
+        for y in 0..h {
+            for x in 0..w {
+                let nx = x as f64 / w as f64;
+                let ny = y as f64 / h as f64;
+                let ridge = 430.0 * ((nx * PI * 3.2).sin() * (ny * PI * 2.4).cos());
+                let hill = 900.0 * (-((nx - 0.57).powi(2) + (ny - 0.46).powi(2)) * 17.0).exp();
+                let valleys = 170.0 * ((nx * PI * 8.0 + ny * PI * 3.0).sin());
+                z.push(1100.0 + ridge + hill + valleys);
             }
         }
-
-        match RasterGrid::new(width, height, 30.0, elevation) {
+        match RasterGrid::new(w, h, 30.0, z) {
             Ok(grid) => {
                 self.dem = Some(GeoTiffDem {
                     grid,
-                    path: std::path::PathBuf::from("synthetic_demo_dem"),
+                    path: "synthetic_demo_dem".into(),
                     epsg: 32767,
-                    crs_label: "Synthetic local metric grid".to_string(),
+                    crs_label: "Synthetic local metric grid".into(),
                     origin_x: 0.0,
                     origin_y: 0.0,
                     pixel_size_m: 30.0,
@@ -106,728 +127,810 @@ impl StarApp {
                 });
                 self.report = None;
                 self.error = None;
+                self.invalidate_map();
             }
-            Err(error) => self.error = Some(error),
+            Err(e) => self.error = Some(e),
         }
     }
-
     fn run_analysis(&mut self) {
         self.error = None;
         self.report = None;
-
         let Some(dem) = &self.dem else {
-            self.error = Some("Load a DEM before running analysis.".to_string());
+            self.error = Some("Load a DEM before running analysis.".into());
             return;
         };
-
         match extract_terrain_batch(&dem.grid, self.radius) {
-            Ok(report) => self.report = Some(report),
-            Err(error) => self.error = Some(error),
+            Ok(r) => self.report = Some(r),
+            Err(e) => self.error = Some(e),
         }
     }
-
-    fn color_for_elevation(value: f64, min: f64, max: f64) -> egui::Color32 {
-        let t = if max > min {
-            ((value - min) / (max - min)).clamp(0.0, 1.0)
-        } else {
-            0.5
-        };
-
-        let stops = [
-            (0.0, [20.0, 45.0, 90.0]),
-            (0.25, [20.0, 130.0, 150.0]),
-            (0.5, [80.0, 180.0, 125.0]),
-            (0.75, [220.0, 180.0, 75.0]),
-            (1.0, [245.0, 240.0, 220.0]),
-        ];
-
-        let mut lower = stops[0];
-        let mut upper = stops[stops.len() - 1];
-
+    fn color_ramp(t: f64, stops: &[(f64, [u8; 3])]) -> egui::Color32 {
+        let t = t.clamp(0.0, 1.0);
+        let mut a = stops[0];
+        let mut b = stops[stops.len() - 1];
         for pair in stops.windows(2) {
             if t >= pair[0].0 && t <= pair[1].0 {
-                lower = pair[0];
-                upper = pair[1];
+                a = pair[0];
+                b = pair[1];
                 break;
             }
         }
-
-        let local_t = if upper.0 > lower.0 {
-            (t - lower.0) / (upper.0 - lower.0)
+        let q = if b.0 > a.0 {
+            (t - a.0) / (b.0 - a.0)
         } else {
             0.0
         };
-
-        let channel = |i: usize| -> u8 {
-            (lower.1[i] + (upper.1[i] - lower.1[i]) * local_t)
-                .round()
-                .clamp(0.0, 255.0) as u8
-        };
-
-        egui::Color32::from_rgb(channel(0), channel(1), channel(2))
+        let c = |i: usize| (a.1[i] as f64 + (b.1[i] as f64 - a.1[i] as f64) * q).round() as u8;
+        egui::Color32::from_rgb(c(0), c(1), c(2))
     }
-
-    fn draw_heatmap(ui: &mut egui::Ui, grid: &RasterGrid) {
-        let Some((min, max)) = grid.min_max() else {
-            ui.label("No valid elevation values.");
-            return;
-        };
-
-        let width = ui.available_width().max(320.0);
-        let height = (width * 0.43).clamp(300.0, 520.0);
-        let desired = egui::vec2(width, height);
-        let (rect, _) = ui.allocate_exact_size(desired, egui::Sense::hover());
-        let painter = ui.painter_at(rect);
-
-        painter.rect_filled(rect, 10.0, egui::Color32::from_rgb(10, 18, 30));
-
-        let stride = (grid.width.max(grid.height) / 180).max(1);
-        let cols = grid.width.div_ceil(stride);
-        let rows = grid.height.div_ceil(stride);
-        let cell_w = rect.width() / cols as f32;
-        let cell_h = rect.height() / rows as f32;
-
-        for row in 0..rows {
-            for col in 0..cols {
-                let x = col * stride;
-                let y = row * stride;
-
-                if let Some(value) = grid.get(x, y) {
-                    let cell = egui::Rect::from_min_size(
-                        egui::pos2(
-                            rect.left() + col as f32 * cell_w,
-                            rect.top() + row as f32 * cell_h,
-                        ),
-                        egui::vec2(cell_w + 0.7, cell_h + 0.7),
-                    );
-                    painter.rect_filled(cell, 0.0, Self::color_for_elevation(value, min, max));
+    fn elevation_color(t: f64) -> egui::Color32 {
+        Self::color_ramp(
+            t,
+            &[
+                (0.0, [13, 65, 91]),
+                (0.22, [20, 119, 112]),
+                (0.43, [58, 145, 82]),
+                (0.62, [151, 165, 54]),
+                (0.8, [190, 111, 42]),
+                (1.0, [145, 47, 36]),
+            ],
+        )
+    }
+    fn sample_metric(g: &RasterGrid, x: usize, y: usize) -> Option<(f64, f64, f64, f64)> {
+        let z = g.get(x, y)?;
+        let dx = g.cell_size_m.max(0.001);
+        let l = g.get(x.saturating_sub(1), y).unwrap_or(z);
+        let r = g.get((x + 1).min(g.width - 1), y).unwrap_or(z);
+        let u = g.get(x, y.saturating_sub(1)).unwrap_or(z);
+        let d = g.get(x, (y + 1).min(g.height - 1)).unwrap_or(z);
+        let gx = (r - l) / (2.0 * dx);
+        let gy = (d - u) / (2.0 * dx);
+        let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
+        let shade =
+            ((0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15));
+        let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
+        let mut sum = 0.0;
+        let mut sum2 = 0.0;
+        let mut n = 0.0;
+        for yy in y.saturating_sub(1)..=(y + 1).min(g.height - 1) {
+            for xx in x.saturating_sub(1)..=(x + 1).min(g.width - 1) {
+                if let Some(v) = g.get(xx, yy) {
+                    sum += v;
+                    sum2 += v * v;
+                    n += 1.0;
                 }
             }
         }
-
-        painter.rect_stroke(
-            rect,
-            10.0,
-            egui::Stroke::new(1.0, egui::Color32::from_rgb(55, 72, 94)),
-            egui::StrokeKind::Inside,
-        );
-
-        painter.text(
-            rect.left_top() + egui::vec2(14.0, 12.0),
-            egui::Align2::LEFT_TOP,
-            format!("ELEVATION  ·  {:.0}–{:.0} m", min, max),
-            egui::FontId::proportional(12.0),
-            egui::Color32::WHITE,
-        );
-    }
-
-    fn draw_profile(ui: &mut egui::Ui, grid: &RasterGrid) {
-        let row = grid.height / 2;
-        let values: Vec<f64> = (0..grid.width).filter_map(|x| grid.get(x, row)).collect();
-
-        if values.len() < 2 {
-            ui.label("Insufficient profile data.");
-            return;
-        }
-
-        let min = values.iter().copied().fold(f64::INFINITY, f64::min);
-        let max = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-        let range = (max - min).max(1e-9);
-        let width = ui.available_width().max(240.0);
-        let desired = egui::vec2(width, 220.0);
-        let (rect, _) = ui.allocate_exact_size(desired, egui::Sense::hover());
-        let painter = ui.painter_at(rect);
-
-        painter.rect_filled(rect, 10.0, egui::Color32::from_rgb(12, 20, 33));
-
-        for i in 0..5 {
-            let y = rect.top() + rect.height() * i as f32 / 4.0;
-            painter.line_segment(
-                [
-                    egui::pos2(rect.left() + 10.0, y),
-                    egui::pos2(rect.right() - 10.0, y),
-                ],
-                egui::Stroke::new(1.0, egui::Color32::from_rgb(39, 52, 70)),
-            );
-        }
-
-        let points: Vec<egui::Pos2> = values
-            .iter()
-            .enumerate()
-            .map(|(i, value)| {
-                let x = rect.left()
-                    + 10.0
-                    + (rect.width() - 20.0) * i as f32 / (values.len() - 1) as f32;
-                let normalized = (*value - min) / range;
-                let y = rect.bottom() - 12.0 - normalized as f32 * (rect.height() - 34.0);
-                egui::pos2(x, y)
-            })
-            .collect();
-
-        painter.add(egui::Shape::line(
-            points,
-            egui::Stroke::new(2.5, egui::Color32::from_rgb(67, 220, 202)),
-        ));
-
-        painter.text(
-            rect.left_top() + egui::vec2(12.0, 9.0),
-            egui::Align2::LEFT_TOP,
-            format!("MAX  {:.1} m", max),
-            egui::FontId::proportional(11.0),
-            egui::Color32::from_rgb(220, 230, 242),
-        );
-        painter.text(
-            rect.left_bottom() + egui::vec2(12.0, -9.0),
-            egui::Align2::LEFT_BOTTOM,
-            format!("MIN  {:.1} m", min),
-            egui::FontId::proportional(11.0),
-            egui::Color32::from_rgb(150, 166, 187),
-        );
-        painter.rect_stroke(
-            rect,
-            10.0,
-            egui::Stroke::new(1.0, egui::Color32::from_rgb(42, 58, 78)),
-            egui::StrokeKind::Inside,
-        );
-    }
-
-    fn draw_histogram(ui: &mut egui::Ui, grid: &RasterGrid) {
-        let Some((min, max)) = grid.min_max() else {
-            return;
-        };
-
-        let mut bins = [0usize; 24];
-        let range = (max - min).max(1e-9);
-
-        for y in 0..grid.height {
-            for x in 0..grid.width {
-                if let Some(value) = grid.get(x, y) {
-                    let index = (((value - min) / range) * 23.0).floor().clamp(0.0, 23.0) as usize;
-                    bins[index] += 1;
-                }
-            }
-        }
-
-        let maximum = (*bins.iter().max().unwrap_or(&1)).max(1);
-        let width = ui.available_width().max(240.0);
-        let desired = egui::vec2(width, 220.0);
-        let (rect, _) = ui.allocate_exact_size(desired, egui::Sense::hover());
-        let painter = ui.painter_at(rect);
-
-        painter.rect_filled(rect, 10.0, egui::Color32::from_rgb(12, 20, 33));
-
-        let gap = 4.0;
-        let bar_width = (rect.width() - gap * 25.0) / 24.0;
-
-        for (i, count) in bins.iter().enumerate() {
-            let h = (rect.height() - 24.0) * *count as f32 / maximum as f32;
-            let x = rect.left() + gap + i as f32 * (bar_width + gap);
-            let bar = egui::Rect::from_min_size(
-                egui::pos2(x, rect.bottom() - 12.0 - h),
-                egui::vec2(bar_width.max(1.0), h),
-            );
-            painter.rect_filled(bar, 3.0, egui::Color32::from_rgb(67, 139, 220));
-        }
-
-        painter.text(
-            rect.left_top() + egui::vec2(12.0, 9.0),
-            egui::Align2::LEFT_TOP,
-            format!("{:.0} m", min),
-            egui::FontId::proportional(10.0),
-            egui::Color32::from_rgb(150, 166, 187),
-        );
-        painter.text(
-            rect.right_top() + egui::vec2(-12.0, 9.0),
-            egui::Align2::RIGHT_TOP,
-            format!("{:.0} m", max),
-            egui::FontId::proportional(10.0),
-            egui::Color32::from_rgb(220, 230, 242),
-        );
-        painter.rect_stroke(
-            rect,
-            10.0,
-            egui::Stroke::new(1.0, egui::Color32::from_rgb(42, 58, 78)),
-            egui::StrokeKind::Inside,
-        );
-    }
-
-    fn sidebar(&mut self, ctx: &egui::Context) {
-        egui::SidePanel::left("sidebar")
-            .exact_width(230.0)
-            .frame(egui::Frame::side_top_panel(&ctx.style()).inner_margin(16))
-            .show(ctx, |ui| {
-                ui.add_space(12.0);
-
-                ui.heading(egui::RichText::new("S.T.A.R.").size(29.0).strong());
-
-                ui.label(
-                    egui::RichText::new("GEOSPATIAL INTELLIGENCE")
-                        .size(9.0)
-                        .color(egui::Color32::GRAY),
-                );
-
-                ui.add_space(35.0);
-                ui.label("WORKSPACE");
-                ui.add_space(10.0);
-
-                for (page, label) in [
-                    (Page::Overview, "Overview"),
-                    (Page::Terrain, "Terrain Analysis"),
-                    (Page::Discovery, "Analog Discovery"),
-                ] {
-                    if ui
-                        .selectable_label(self.page == page, format!("  {label}"))
-                        .clicked()
-                    {
-                        self.page = page;
-                    }
-                }
-
-                ui.add_space(30.0);
-                ui.separator();
-
-                ui.label("MISSION BODIES");
-                ui.add_space(8.0);
-                ui.label("◉ Earth");
-                ui.label("◉ Moon");
-                ui.label("◉ Mars");
-
-                ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                    ui.separator();
-                    ui.label(
-                        egui::RichText::new("RUST ENGINE · v0.3")
-                            .size(10.0)
-                            .color(egui::Color32::GRAY),
-                    );
-                });
-            });
-    }
-
-    fn overview(&self, ui: &mut egui::Ui) {
-        ui.heading("Mission Overview");
-        ui.label("Spatio-Temporal & Physical Analog Discovery");
-        ui.add_space(20.0);
-
-        ui.columns(3, |columns| {
-            Self::metric(&mut columns[0], "TARGET BODIES", "02", "Moon and Mars");
-
-            Self::metric(
-                &mut columns[1],
-                "TERRAIN FEATURES",
-                "05",
-                "Physical parameters",
-            );
-
-            Self::metric(
-                &mut columns[2],
-                "BACKEND TESTS",
-                "37+",
-                "Core validation suite",
-            );
-        });
-
-        ui.add_space(25.0);
-        ui.heading("System Pipeline");
-        ui.add_space(10.0);
-
-        egui::Frame::group(ui.style())
-            .inner_margin(20)
-            .show(ui, |ui| {
-                ui.colored_label(egui::Color32::LIGHT_BLUE, "01  GEOSPATIAL DATA");
-                ui.label("GeoTIFF · DEM · CRS · NoData");
-                ui.add_space(12.0);
-
-                ui.label("↓");
-                ui.add_space(12.0);
-
-                ui.colored_label(egui::Color32::LIGHT_GREEN, "02  TERRAIN PROCESSING");
-                ui.label("Slope · Relief · Roughness · Curvature");
-                ui.add_space(12.0);
-
-                ui.label("↓");
-                ui.add_space(12.0);
-
-                ui.colored_label(egui::Color32::LIGHT_YELLOW, "03  ANALOG DISCOVERY");
-                ui.label("Similarity · Novelty · Confidence · Analog Gap");
-            });
-
-        ui.add_space(25.0);
-        ui.heading("Current Dataset");
-
-        if let Some(dem) = &self.dem {
-            ui.label(dem.path.display().to_string());
-            ui.label(format!(
-                "{} × {} | {} | {:.2} m/pixel",
-                dem.grid.width, dem.grid.height, dem.crs_label, dem.pixel_size_m,
-            ));
+        let rough = if n > 0.0 {
+            (sum2 / n - (sum / n).powi(2)).max(0.0).sqrt()
         } else {
-            ui.label("No dataset loaded.");
-        }
-
-        ui.add_space(15.0);
-        ui.heading("Development Status");
-        ui.label("✓ Rust computational core");
-        ui.label("✓ Terrain Fingerprint");
-        ui.label("✓ DEM batch processing");
-        ui.label("✓ GeoTIFF single-band reader");
-        ui.label("✓ CRS and NoData handling");
-        ui.label("✓ Elevation heatmap and profile");
-        ui.label("○ Geographic CRS metric transformation");
-        ui.label("○ Lunar and Martian raster ingestion");
-        ui.label("○ Analog discovery engine");
+            0.0
+        };
+        Some((slope, shade, rough, lap))
     }
-
-    fn terrain(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(8.0);
-
-        ui.horizontal(|ui| {
-            ui.vertical(|ui| {
-                ui.heading(
-                    egui::RichText::new("Terrain Intelligence")
-                        .size(27.0)
-                        .strong(),
-                );
-                ui.label(
-                    egui::RichText::new("GEOSPATIAL ANALYSIS WORKSPACE")
-                        .size(10.0)
-                        .color(egui::Color32::from_rgb(125, 148, 174)),
-                );
-            });
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                ui.colored_label(
-                    egui::Color32::from_rgb(83, 220, 157),
-                    "●  ANALYSIS ENGINE READY",
-                );
-            });
-        });
-
-        ui.add_space(18.0);
-
-        egui::Frame::group(ui.style())
-            .inner_margin(egui::Margin::same(12))
-            .show(ui, |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    if ui.button("＋  Load GeoTIFF").clicked() {
-                        self.load_file();
-                    }
-                    if ui.button("◈  Generate demo terrain").clicked() {
-                        self.generate_demo();
-                    }
-                    if ui.button("▶  Run analysis").clicked() {
-                        self.run_analysis();
-                    }
-                    ui.separator();
-                    ui.label("Neighborhood radius");
-                    ui.add(egui::Slider::new(&mut self.radius, 1..=8).suffix(" cells"));
-                });
-            });
-
-        if let Some(error) = &self.error {
-            ui.add_space(10.0);
-            ui.colored_label(egui::Color32::LIGHT_RED, format!("⚠  {error}"));
+    fn build_texture(&mut self, ctx: &egui::Context) {
+        if self.texture.is_some() && self.texture_layer == Some(self.layer) {
+            return;
         }
-
         let Some(dem) = &self.dem else {
-            ui.add_space(24.0);
-            egui::Frame::group(ui.style())
-                .inner_margin(egui::Margin::same(28))
-                .show(ui, |ui| {
-                    ui.vertical_centered(|ui| {
-                        ui.add_space(22.0);
-                        ui.heading("No elevation dataset loaded");
-                        ui.label("Load a GeoTIFF DEM or generate a synthetic terrain to explore the workspace.");
-                        ui.add_space(12.0);
-                        if ui.button("Generate demo terrain").clicked() {
-                            self.generate_demo();
-                        }
-                        ui.add_space(22.0);
-                    });
-                });
+            self.texture = None;
             return;
         };
-
-        let valid = dem.grid.valid_cells();
-        let total = dem.grid.width * dem.grid.height;
-        let min_max = dem.grid.min_max();
-
-        ui.add_space(14.0);
-        ui.columns(4, |columns| {
-            Self::metric(
-                &mut columns[0],
-                "RASTER SIZE",
-                &format!("{} × {}", dem.grid.width, dem.grid.height),
-                "columns × rows",
-            );
-            Self::metric(
-                &mut columns[1],
-                "GROUND SAMPLE",
-                &format!("{:.1} m", dem.pixel_size_m),
-                "pixel resolution",
-            );
-            Self::metric(
-                &mut columns[2],
-                "VALID CELLS",
-                &format!("{:.1}%", valid as f64 / total.max(1) as f64 * 100.0),
-                &format!("{valid} of {total}"),
-            );
-            Self::metric(
-                &mut columns[3],
-                "ELEVATION RANGE",
-                &min_max
-                    .map(|(lo, hi)| format!("{:.0} m", hi - lo))
-                    .unwrap_or_else(|| "—".to_string()),
-                "minimum to maximum",
-            );
-        });
-
-        ui.add_space(14.0);
-
-        egui::Frame::group(ui.style())
-            .inner_margin(egui::Margin::same(14))
+        let g = &dem.grid;
+        let Some((min, max)) = g.min_max() else {
+            return;
+        };
+        let scale = (g.width.max(g.height) as f64 / 1400.0).max(1.0);
+        let w = ((g.width as f64 / scale).ceil() as usize).max(1);
+        let h = ((g.height as f64 / scale).ceil() as usize).max(1);
+        let mut pixels = Vec::with_capacity(w * h);
+        let mut metric_max = 0.0_f64;
+        if self.layer == Layer::Slope || self.layer == Layer::Roughness {
+            for y in (0..g.height).step_by(scale.ceil() as usize) {
+                for x in (0..g.width).step_by(scale.ceil() as usize) {
+                    if let Some(m) = Self::sample_metric(g, x, y) {
+                        metric_max =
+                            metric_max.max(if self.layer == Layer::Slope { m.0 } else { m.2 });
+                    }
+                }
+            }
+        }
+        let metric_max = metric_max.max(1e-9);
+        for py in 0..h {
+            for px in 0..w {
+                let x = ((px as f64 * scale).round() as usize).min(g.width - 1);
+                let y = ((py as f64 * scale).round() as usize).min(g.height - 1);
+                let Some(v) = g.get(x, y) else {
+                    pixels.push(egui::Color32::TRANSPARENT);
+                    continue;
+                };
+                let t = (v - min) / (max - min).max(1e-9);
+                let color = match self.layer {
+                    Layer::Elevation => Self::elevation_color(t),
+                    Layer::Hillshade => {
+                        let base = Self::elevation_color(t);
+                        let sh = Self::sample_metric(g, x, y)
+                            .map(|m| m.1 as f32)
+                            .unwrap_or(0.5);
+                        egui::Color32::from_rgb(
+                            (base.r() as f32 * sh).clamp(0., 255.) as u8,
+                            (base.g() as f32 * sh).clamp(0., 255.) as u8,
+                            (base.b() as f32 * sh).clamp(0., 255.) as u8,
+                        )
+                    }
+                    Layer::Slope => Self::color_ramp(
+                        Self::sample_metric(g, x, y)
+                            .map(|m| m.0 / metric_max)
+                            .unwrap_or(0.0),
+                        &[
+                            (0., [24, 83, 130]),
+                            (0.35, [43, 157, 150]),
+                            (0.7, [232, 184, 66]),
+                            (1., [177, 53, 43]),
+                        ],
+                    ),
+                    Layer::Roughness => Self::color_ramp(
+                        Self::sample_metric(g, x, y)
+                            .map(|m| m.2 / metric_max)
+                            .unwrap_or(0.0),
+                        &[
+                            (0., [20, 90, 120]),
+                            (0.4, [63, 160, 115]),
+                            (0.75, [220, 174, 61]),
+                            (1., [158, 52, 43]),
+                        ],
+                    ),
+                    Layer::Curvature => {
+                        let c = Self::sample_metric(g, x, y).map(|m| m.3).unwrap_or(0.0);
+                        let q = (c * 10000.0).tanh();
+                        if q >= 0.0 {
+                            egui::Color32::from_rgb(
+                                (55.0 + 150.0 * q) as u8,
+                                (75.0 + 30.0 * q) as u8,
+                                45,
+                            )
+                        } else {
+                            egui::Color32::from_rgb(
+                                45,
+                                (80.0 + 50.0 * q) as u8,
+                                (120.0 - 70.0 * q) as u8,
+                            )
+                        }
+                    }
+                };
+                pixels.push(color);
+            }
+        }
+        let image = egui::ColorImage {
+            size: [w, h],
+            pixels,
+        };
+        self.texture = Some(ctx.load_texture(
+            format!("star-{:?}", self.layer),
+            image,
+            egui::TextureOptions::LINEAR,
+        ));
+        self.texture_layer = Some(self.layer);
+    }
+    fn panel_frame<R>(ui: &mut egui::Ui, add: impl FnOnce(&mut egui::Ui) -> R) -> R {
+        egui::Frame::none()
+            .fill(PANEL)
+            .stroke(egui::Stroke::new(1.0, LINE))
+            .inner_margin(egui::Margin::same(13))
+            .show(ui, add)
+            .inner
+    }
+    fn metric_tile(ui: &mut egui::Ui, label: &str, value: String, unit: &str) {
+        egui::Frame::none()
+            .fill(PANEL_2)
+            .inner_margin(egui::Margin::same(10))
             .show(ui, |ui| {
-                ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new(label.to_uppercase())
+                        .size(9.)
+                        .color(GREEN),
+                );
+                ui.label(
+                    egui::RichText::new(value)
+                        .size(21.)
+                        .strong()
+                        .color(egui::Color32::WHITE),
+                );
+                ui.label(egui::RichText::new(unit).size(9.).color(MUTED));
+            });
+    }
+    fn topbar(&mut self, ctx: &egui::Context) {
+        egui::TopBottomPanel::top("star-topbar")
+            .exact_height(58.)
+            .frame(
+                egui::Frame::none()
+                    .fill(BG)
+                    .stroke(egui::Stroke::new(1., LINE)),
+            )
+            .show(ctx, |ui| {
+                ui.horizontal_centered(|ui| {
+                    ui.add_space(10.);
+                    ui.label(egui::RichText::new("☰").size(22.).color(MUTED));
+                    ui.add_space(12.);
+                    ui.label(
+                        egui::RichText::new("S.T.A.R.")
+                            .size(24.)
+                            .strong()
+                            .color(egui::Color32::WHITE),
+                    );
+                    ui.separator();
                     ui.vertical(|ui| {
-                        ui.label(egui::RichText::new("ELEVATION MODEL").strong().size(12.0));
                         ui.label(
-                            egui::RichText::new(dem.path.display().to_string())
-                                .size(10.0)
-                                .color(egui::Color32::from_rgb(139, 157, 179)),
+                            egui::RichText::new("TERRAIN INTELLIGENCE")
+                                .strong()
+                                .size(13.),
+                        );
+                        ui.label(
+                            egui::RichText::new("SPATIO-TEMPORAL & PHYSICAL ANALOG DISCOVERY")
+                                .size(9.)
+                                .color(GREEN),
                         );
                     });
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.colored_label(GREEN, "● ENGINE ONLINE");
+                        ui.add_space(18.);
+                        if ui
+                            .selectable_label(self.page == Page::Discovery, "Analog Discovery")
+                            .clicked()
+                        {
+                            self.page = Page::Discovery;
+                        }
+                        if ui
+                            .selectable_label(self.page == Page::Terrain, "Terrain Analysis")
+                            .clicked()
+                        {
+                            self.page = Page::Terrain;
+                        }
+                        if ui
+                            .selectable_label(self.page == Page::Overview, "Overview")
+                            .clicked()
+                        {
+                            self.page = Page::Overview;
+                        }
+                    });
+                });
+            });
+    }
+    fn left_panel(&mut self, ctx: &egui::Context) {
+        egui::SidePanel::left("star-project-panel")
+            .resizable(true)
+            .default_width(315.)
+            .width_range(275.0..=390.0)
+            .frame(
+                egui::Frame::none()
+                    .fill(PANEL)
+                    .stroke(egui::Stroke::new(1., LINE)),
+            )
+            .show(ctx, |ui| {
+                egui::ScrollArea::vertical()
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        Self::panel_frame(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.label(
+                                    egui::RichText::new("▣  PROJECT INFORMATION")
+                                        .strong()
+                                        .size(12.),
+                                );
+                                ui.with_layout(
+                                    egui::Layout::right_to_left(egui::Align::Center),
+                                    |ui| {
+                                        if ui.small_button("⋯").clicked() {}
+                                    },
+                                );
+                            });
+                            ui.add_space(8.);
+                            if let Some(d) = &self.dem {
+                                let (lo, hi) = d.grid.min_max().unwrap_or((0., 0.));
+                                ui.columns(2, |c| {
+                                    Self::metric_tile(
+                                        &mut c[0],
+                                        "Elevation",
+                                        format!("{:.0} m", (lo + hi) / 2.),
+                                        "mean raster height",
+                                    );
+                                    Self::metric_tile(
+                                        &mut c[1],
+                                        "Resolution",
+                                        format!("{:.1} m", d.pixel_size_m),
+                                        "ground sample distance",
+                                    );
+                                });
+                                ui.add_space(6.);
+                                ui.label(
+                                    egui::RichText::new(format!(
+                                        "{} × {}  ·  {}",
+                                        d.grid.width, d.grid.height, d.crs_label
+                                    ))
+                                    .size(10.)
+                                    .color(MUTED),
+                                );
+                            } else {
+                                ui.label(
+                                    egui::RichText::new("No terrain dataset loaded").color(MUTED),
+                                );
+                            }
+                        });
+                        ui.add_space(7.);
+                        Self::panel_frame(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.label(
+                                    egui::RichText::new("▤  INFORMATION LAYERS")
+                                        .strong()
+                                        .size(12.),
+                                );
+                                ui.with_layout(
+                                    egui::Layout::right_to_left(egui::Align::Center),
+                                    |ui| {
+                                        ui.label(egui::RichText::new("⌄").color(MUTED));
+                                    },
+                                );
+                            });
+                            ui.add_space(6.);
+                            for layer in Layer::all() {
+                                let active = self.layer == layer;
+                                let (color, desc) = match layer {
+                                    Layer::Elevation => {
+                                        (egui::Color32::from_rgb(209, 165, 67), "DEM")
+                                    }
+                                    Layer::Hillshade => {
+                                        (egui::Color32::from_rgb(83, 180, 174), "SHADE")
+                                    }
+                                    Layer::Slope => (egui::Color32::from_rgb(221, 130, 67), "DEG"),
+                                    Layer::Roughness => {
+                                        (egui::Color32::from_rgb(132, 190, 105), "STD")
+                                    }
+                                    Layer::Curvature => {
+                                        (egui::Color32::from_rgb(147, 137, 214), "LAP")
+                                    }
+                                };
+                                ui.horizontal(|ui| {
+                                    let r = ui.selectable_label(
+                                        active,
+                                        egui::RichText::new(format!("◈  {}", layer.label())).color(
+                                            if active { egui::Color32::WHITE } else { MUTED },
+                                        ),
+                                    );
+                                    ui.with_layout(
+                                        egui::Layout::right_to_left(egui::Align::Center),
+                                        |ui| {
+                                            ui.label(
+                                                egui::RichText::new(if active {
+                                                    "●"
+                                                } else {
+                                                    "○"
+                                                })
+                                                .color(if active { GREEN } else { MUTED }),
+                                            );
+                                            ui.label(
+                                                egui::RichText::new(desc).size(8.).color(MUTED),
+                                            );
+                                        },
+                                    );
+                                    if r.clicked() {
+                                        self.layer = layer;
+                                        self.texture = None;
+                                        self.texture_layer = None;
+                                    }
+                                });
+                            }
+                        });
+                        ui.add_space(7.);
+                        Self::panel_frame(ui, |ui| {
+                            ui.label(
+                                egui::RichText::new("⌁  ELEVATION PROFILE")
+                                    .strong()
+                                    .size(12.),
+                            );
+                            ui.add_space(6.);
+                            if let Some(d) = &self.dem {
+                                Self::profile_chart(ui, &d.grid);
+                            } else {
+                                ui.label(
+                                    egui::RichText::new("Load a DEM to calculate profile")
+                                        .size(10.)
+                                        .color(MUTED),
+                                );
+                            }
+                        });
+                        ui.add_space(7.);
+                        Self::panel_frame(ui, |ui| {
+                            ui.label(egui::RichText::new("DATA SOURCE").strong().size(11.));
+                            if ui.button("＋  Load GeoTIFF").clicked() {
+                                self.load_file();
+                            }
+                            if ui.button("◈  Generate demo terrain").clicked() {
+                                self.generate_demo();
+                            }
+                            if ui.button("▶  Run terrain analysis").clicked() {
+                                self.run_analysis();
+                            }
+                            ui.horizontal(|ui| {
+                                ui.label(
+                                    egui::RichText::new("Neighborhood").size(10.).color(MUTED),
+                                );
+                                ui.add(egui::Slider::new(&mut self.radius, 1..=8).suffix(" px"));
+                            });
+                            if let Some(e) = &self.error {
+                                ui.colored_label(egui::Color32::LIGHT_RED, e);
+                            }
+                        });
+                    });
+            });
+    }
+    fn profile_chart(ui: &mut egui::Ui, g: &RasterGrid) {
+        let row = g.height / 2;
+        let vals: Vec<f64> = (0..g.width).filter_map(|x| g.get(x, row)).collect();
+        if vals.len() < 2 {
+            return;
+        }
+        let min = vals.iter().copied().fold(f64::INFINITY, f64::min);
+        let max = vals.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let rect = ui.allocate_space(egui::vec2(ui.available_width(), 142.)).1;
+        let p = ui.painter_at(rect);
+        p.rect_filled(rect, 4., PANEL_2);
+        for i in 0..4 {
+            let y = rect.top() + rect.height() * i as f32 / 3.;
+            p.line_segment(
+                [
+                    egui::pos2(rect.left() + 5., y),
+                    egui::pos2(rect.right() - 5., y),
+                ],
+                egui::Stroke::new(1., LINE),
+            );
+        }
+        let pts: Vec<_> = vals
+            .iter()
+            .enumerate()
+            .map(|(i, v)| {
+                egui::pos2(
+                    rect.left() + 5. + (rect.width() - 10.) * i as f32 / (vals.len() - 1) as f32,
+                    rect.bottom()
+                        - 5.
+                        - ((*v - min) / (max - min).max(1e-9)) as f32 * (rect.height() - 10.),
+                )
+            })
+            .collect();
+        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8, GREEN)));
+        p.text(
+            rect.left_top() + egui::vec2(7., 5.),
+            egui::Align2::LEFT_TOP,
+            format!("{max:.0} m"),
+            egui::FontId::proportional(9.),
+            MUTED,
+        );
+        p.text(
+            rect.left_bottom() + egui::vec2(7., -5.),
+            egui::Align2::LEFT_BOTTOM,
+            format!("{min:.0} m"),
+            egui::FontId::proportional(9.),
+            MUTED,
+        );
+    }
+    fn right_panel(&mut self, ctx: &egui::Context) {
+        egui::SidePanel::right("star-inspector")
+            .resizable(true)
+            .default_width(260.)
+            .width_range(230.0..=330.0)
+            .frame(
+                egui::Frame::none()
+                    .fill(PANEL)
+                    .stroke(egui::Stroke::new(1., LINE)),
+            )
+            .show(ctx, |ui| {
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    Self::panel_frame(ui, |ui| {
+                        ui.label(egui::RichText::new("⌖  POINT INSPECTOR").strong().size(12.));
+                        ui.add_space(9.);
+                        if let (Some(d), Some((x, y))) = (&self.dem, self.selected) {
+                            let g = &d.grid;
+                            ui.label(egui::RichText::new("SELECTED PIXEL").size(9.).color(GREEN));
+                            ui.heading(format!("{x} , {y}"));
+                            let z = g.get(x, y);
+                            ui.separator();
+                            if let Some(z) = z {
+                                Self::detail(ui, "Elevation", format!("{z:.2} m"));
+                                if let Some((s, _, r, c)) = Self::sample_metric(g, x, y) {
+                                    Self::detail(ui, "Slope", format!("{s:.2}°"));
+                                    Self::detail(ui, "Roughness", format!("{r:.2} m"));
+                                    Self::detail(ui, "Curvature proxy", format!("{c:.6}"));
+                                }
+                            } else {
+                                ui.label("NoData cell");
+                            }
+                            let mx = d.origin_x + (x as f64 + 0.5) * d.pixel_size_m;
+                            let my = d.origin_y - (y as f64 + 0.5) * d.pixel_size_m;
+                            Self::detail(ui, "Map X", format!("{mx:.2}"));
+                            Self::detail(ui, "Map Y", format!("{my:.2}"));
+                        } else {
+                            ui.label(
+                                egui::RichText::new(
+                                    "Click anywhere on the terrain map to inspect a raster cell.",
+                                )
+                                .size(11.)
+                                .color(MUTED),
+                            );
+                        }
+                    });
+                    ui.add_space(8.);
+                    Self::panel_frame(ui, |ui| {
+                        ui.label(egui::RichText::new("MAP LEGEND").strong().size(12.));
                         ui.label(
-                            egui::RichText::new(format!(
-                                "{}  ·  {:.1} m / px",
-                                dem.crs_label, dem.pixel_size_m
-                            ))
-                            .size(10.0)
-                            .color(egui::Color32::from_rgb(153, 174, 198)),
+                            egui::RichText::new(self.layer.label())
+                                .size(10.)
+                                .color(MUTED),
+                        );
+                        let stops = match self.layer {
+                            Layer::Elevation | Layer::Hillshade => vec![
+                                ("LOW", egui::Color32::from_rgb(13, 65, 91)),
+                                ("MID", egui::Color32::from_rgb(58, 145, 82)),
+                                ("HIGH", egui::Color32::from_rgb(145, 47, 36)),
+                            ],
+                            Layer::Slope => vec![
+                                ("0°", egui::Color32::from_rgb(24, 83, 130)),
+                                ("Moderate", egui::Color32::from_rgb(232, 184, 66)),
+                                ("Steep", egui::Color32::from_rgb(177, 53, 43)),
+                            ],
+                            _ => vec![
+                                ("Low", egui::Color32::from_rgb(20, 90, 120)),
+                                ("Medium", egui::Color32::from_rgb(63, 160, 115)),
+                                ("High", egui::Color32::from_rgb(158, 52, 43)),
+                            ],
+                        };
+                        for (label, col) in stops {
+                            ui.horizontal(|ui| {
+                                ui.colored_label(col, "■");
+                                ui.label(egui::RichText::new(label).size(10.).color(MUTED));
+                            });
+                        }
+                    });
+                    ui.add_space(8.);
+                    Self::panel_frame(ui, |ui| {
+                        ui.label(egui::RichText::new("MAP CONTROLS").strong().size(12.));
+                        ui.horizontal(|ui| {
+                            if ui.button("＋").clicked() {
+                                self.zoom = (self.zoom * 1.25).clamp(0.35, 8.0);
+                            }
+                            if ui.button("−").clicked() {
+                                self.zoom = (self.zoom / 1.25).clamp(0.35, 8.0);
+                            }
+                        });
+                        ui.label(
+                            egui::RichText::new("Drag map to pan · Click to inspect")
+                                .size(10.)
+                                .color(MUTED),
                         );
                     });
                 });
-                ui.add_space(10.0);
-                Self::draw_heatmap(ui, &dem.grid);
-                ui.horizontal(|ui| {
-                    ui.label(
-                        egui::RichText::new("LOW")
-                            .color(egui::Color32::from_rgb(20, 130, 150))
-                            .strong(),
-                    );
-                    ui.add(
-                        egui::ProgressBar::new(0.52)
-                            .desired_width(ui.available_width() - 90.0)
-                            .fill(egui::Color32::from_rgb(69, 150, 175))
-                            .show_percentage(),
-                    );
-                    ui.label(
-                        egui::RichText::new("HIGH")
-                            .color(egui::Color32::from_rgb(245, 224, 170))
-                            .strong(),
-                    );
-                });
             });
-
-        ui.add_space(14.0);
-        ui.columns(2, |columns| {
-            columns[0].vertical(|ui| {
-                ui.label(egui::RichText::new("ELEVATION PROFILE").strong().size(12.0));
-                ui.label(
-                    egui::RichText::new("Central transect · west to east")
-                        .size(10.0)
-                        .color(egui::Color32::from_rgb(130, 149, 171)),
-                );
-                ui.add_space(7.0);
-                Self::draw_profile(ui, &dem.grid);
-            });
-            columns[1].vertical(|ui| {
-                ui.label(
-                    egui::RichText::new("ELEVATION DISTRIBUTION")
-                        .strong()
-                        .size(12.0),
-                );
-                ui.label(
-                    egui::RichText::new("Frequency of elevation values")
-                        .size(10.0)
-                        .color(egui::Color32::from_rgb(130, 149, 171)),
-                );
-                ui.add_space(7.0);
-                Self::draw_histogram(ui, &dem.grid);
+    }
+    fn detail(ui: &mut egui::Ui, label: &str, value: String) {
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new(label).size(10.).color(MUTED));
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                ui.label(egui::RichText::new(value).size(11.).strong());
             });
         });
-
-        if let Some(report) = &self.report {
-            ui.add_space(18.0);
-            ui.separator();
-            ui.add_space(12.0);
-            ui.heading("Terrain extraction results");
-            ui.add_space(8.0);
-
-            ui.columns(3, |columns| {
-                Self::metric(
-                    &mut columns[0],
-                    "PROCESSED",
-                    &report.processed_cells().to_string(),
-                    "valid fingerprints",
-                );
-                Self::metric(
-                    &mut columns[1],
-                    "SKIPPED",
-                    &report.skipped_cells.to_string(),
-                    "edges and invalid cells",
-                );
-                Self::metric(
-                    &mut columns[2],
-                    "COVERAGE",
-                    &format!("{:.1}%", report.coverage_fraction() * 100.0),
-                    "raster coverage",
-                );
-            });
-
-            ui.add_space(10.0);
-            ui.label(format!(
-                "Mean elevation  ·  {}",
-                report
-                    .mean_elevation_m()
-                    .map(|v| format!("{:.2} m", v))
-                    .unwrap_or_else(|| "Unavailable".to_string())
-            ));
-
-            ui.add_space(10.0);
-            ui.label(
-                egui::RichText::new("TERRAIN FINGERPRINT SAMPLES")
-                    .strong()
-                    .size(12.0),
-            );
-            egui::Frame::group(ui.style())
-                .inner_margin(egui::Margin::same(8))
-                .show(ui, |ui| {
-                    egui::ScrollArea::horizontal().show(ui, |ui| {
-                        egui::Grid::new("terrain_results")
-                            .striped(true)
-                            .min_col_width(85.0)
-                            .show(ui, |ui| {
-                                for heading in [
-                                    "X",
-                                    "Y",
-                                    "Elevation (m)",
-                                    "Slope (°)",
-                                    "Relief (m)",
-                                    "Roughness (m)",
-                                    "Curvature",
-                                ] {
-                                    ui.strong(heading);
-                                }
-                                ui.end_row();
-
-                                for sample in report.samples.iter().take(40) {
-                                    let fp = &sample.fingerprint;
-                                    ui.label(sample.x.to_string());
-                                    ui.label(sample.y.to_string());
-                                    ui.label(format!("{:.1}", fp.elevation_m.unwrap_or_default()));
-                                    ui.label(format!("{:.2}", fp.slope_deg.unwrap_or_default()));
-                                    ui.label(format!(
-                                        "{:.2}",
-                                        fp.local_relief_m.unwrap_or_default()
-                                    ));
-                                    ui.label(format!("{:.2}", fp.roughness_m.unwrap_or_default()));
-                                    ui.label(format!("{:.5}", fp.curvature.unwrap_or_default()));
-                                    ui.end_row();
-                                }
-                            });
-                    });
-                });
-        }
     }
-
-    fn discovery(&self, ui: &mut egui::Ui) {
-        ui.heading("Analog Discovery");
-        ui.label("Earth analog candidates for lunar and Martian targets");
-        ui.add_space(20.0);
-
-        egui::Frame::group(ui.style())
-            .inner_margin(20)
-            .show(ui, |ui| {
-                ui.heading("Discovery Pipeline");
-                ui.label("1. Select Moon or Mars target");
-                ui.label("2. Extract terrain and thermal features");
-                ui.label("3. Search terrestrial candidates");
-                ui.label("4. Calculate physical similarity");
-                ui.label("5. Estimate Analog Gap");
-                ui.label("6. Validate candidate reliability");
+    fn map_view(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        let Some((gw, gh, path)) = self
+            .dem
+            .as_ref()
+            .map(|d| (d.grid.width, d.grid.height, d.path.display().to_string()))
+        else {
+            ui.centered_and_justified(|ui| {
+                ui.vertical_centered(|ui| {
+                    ui.heading("S.T.A.R. Terrain Workspace");
+                    ui.label(
+                        egui::RichText::new(
+                            "Load a projected GeoTIFF DEM or generate sample terrain to begin.",
+                        )
+                        .color(MUTED),
+                    );
+                    if ui.button("Generate demo terrain").clicked() {
+                        self.generate_demo();
+                    }
+                });
             });
-
-        ui.add_space(20.0);
-        ui.label("Discovery engine is under development.");
+            return;
+        };
+        self.build_texture(ctx);
+        let Some(tex) = self.texture.clone() else {
+            return;
+        };
+        ui.horizontal(|ui| {
+            ui.label(
+                egui::RichText::new(format!("{}  /  {}", path, self.layer.label()))
+                    .size(10.)
+                    .color(MUTED),
+            );
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.button("Grid").clicked() {
+                    self.show_grid = !self.show_grid;
+                }
+                if ui.button("Reset view").clicked() {
+                    self.zoom = 1.;
+                    self.pan = egui::Vec2::ZERO;
+                }
+                ui.label(format!("{}%", (self.zoom * 100.) as u32));
+            });
+        });
+        ui.add_space(5.);
+        let available = ui.available_size().max(egui::vec2(200., 200.));
+        let aspect = gw as f32 / gh as f32;
+        let base = (available.x / aspect).min(available.y).max(120.);
+        let base_size = egui::vec2(base * aspect, base);
+        let size = base_size * self.zoom;
+        let (rect, response) = ui.allocate_exact_size(available, egui::Sense::click_and_drag());
+        let map_rect = egui::Rect::from_center_size(
+            rect.center() + self.pan,
+            size.min(egui::vec2(available.x * 2.5, available.y * 2.5)),
+        );
+        let painter = ui.painter_at(rect);
+        painter.rect_filled(rect, 3., egui::Color32::from_rgb(4, 13, 22));
+        painter.image(
+            tex.id(),
+            map_rect,
+            egui::Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1., 1.)),
+            egui::Color32::WHITE,
+        );
+        if self.show_grid {
+            for i in 1..5 {
+                let x = map_rect.left() + map_rect.width() * i as f32 / 5.;
+                let y = map_rect.top() + map_rect.height() * i as f32 / 5.;
+                painter.line_segment(
+                    [
+                        egui::pos2(x, map_rect.top()),
+                        egui::pos2(x, map_rect.bottom()),
+                    ],
+                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                );
+                painter.line_segment(
+                    [
+                        egui::pos2(map_rect.left(), y),
+                        egui::pos2(map_rect.right(), y),
+                    ],
+                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                );
+            }
+        }
+        painter.rect_stroke(
+            map_rect,
+            2.,
+            egui::Stroke::new(1., egui::Color32::from_rgb(91, 126, 137)),
+            egui::StrokeKind::Inside,
+        );
+        if let Some((x, y)) = self.selected {
+            let px = map_rect.left() + map_rect.width() * x as f32 / gw as f32;
+            let py = map_rect.top() + map_rect.height() * y as f32 / gh as f32;
+            let pos = egui::pos2(px, py);
+            painter.circle_stroke(pos, 8., egui::Stroke::new(2., egui::Color32::WHITE));
+            painter.line_segment(
+                [pos - egui::vec2(13., 0.), pos + egui::vec2(13., 0.)],
+                egui::Stroke::new(1., egui::Color32::WHITE),
+            );
+            painter.line_segment(
+                [pos - egui::vec2(0., 13.), pos + egui::vec2(0., 13.)],
+                egui::Stroke::new(1., egui::Color32::WHITE),
+            );
+        }
+        if response.clicked() {
+            if let Some(pos) = response.interact_pointer_pos() {
+                if map_rect.contains(pos) {
+                    let nx = ((pos.x - map_rect.left()) / map_rect.width()).clamp(0., 0.999999);
+                    let ny = ((pos.y - map_rect.top()) / map_rect.height()).clamp(0., 0.999999);
+                    self.selected = Some(((nx * gw as f32) as usize, (ny * gh as f32) as usize));
+                }
+            }
+        }
+        if response.dragged() {
+            self.pan += response.drag_delta();
+        }
+        if response.hovered() {
+            let scroll = ctx.input(|i| i.smooth_scroll_delta.y);
+            if scroll != 0.0 {
+                self.zoom = (self.zoom * (1.0 + scroll * 0.001)).clamp(0.35, 8.0);
+            }
+        }
+        let legend_rect = egui::Rect::from_min_size(
+            rect.right_bottom() - egui::vec2(172., 112.),
+            egui::vec2(158., 98.),
+        );
+        painter.rect_filled(legend_rect, 6., egui::Color32::from_black_alpha(205));
+        painter.text(
+            legend_rect.left_top() + egui::vec2(10., 8.),
+            egui::Align2::LEFT_TOP,
+            self.layer.label(),
+            egui::FontId::proportional(11.),
+            egui::Color32::WHITE,
+        );
+        for (i, (c, l)) in [
+            (egui::Color32::from_rgb(13, 65, 91), "LOW"),
+            (egui::Color32::from_rgb(58, 145, 82), "MID"),
+            (egui::Color32::from_rgb(145, 47, 36), "HIGH"),
+        ]
+        .iter()
+        .enumerate()
+        {
+            let y = legend_rect.top() + 32. + i as f32 * 19.;
+            painter.rect_filled(
+                egui::Rect::from_min_size(
+                    egui::pos2(legend_rect.left() + 10., y),
+                    egui::vec2(12., 10.),
+                ),
+                1.,
+                *c,
+            );
+            painter.text(
+                egui::pos2(legend_rect.left() + 30., y),
+                egui::Align2::LEFT_TOP,
+                *l,
+                egui::FontId::proportional(9.),
+                MUTED,
+            );
+        }
+        let compass = egui::pos2(rect.right() - 30., rect.top() + 26.);
+        painter.circle_stroke(
+            compass,
+            15.,
+            egui::Stroke::new(1., egui::Color32::from_white_alpha(140)),
+        );
+        painter.text(
+            compass,
+            egui::Align2::CENTER_CENTER,
+            "N",
+            egui::FontId::proportional(13.),
+            egui::Color32::WHITE,
+        );
     }
 }
 
 impl eframe::App for StarApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.sidebar(ctx);
-
-        egui::TopBottomPanel::top("topbar").show(ctx, |ui| {
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("S.T.A.R. /").color(egui::Color32::GRAY));
-
-                ui.label(match self.page {
-                    Page::Overview => "Overview",
-                    Page::Terrain => "Terrain Intelligence",
-                    Page::Discovery => "Analog Discovery",
-                });
-
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.colored_label(egui::Color32::LIGHT_GREEN, "● ENGINE ONLINE");
-                });
-            });
+        self.topbar(ctx);
+        self.left_panel(ctx);
+        self.right_panel(ctx);
+        egui::CentralPanel::default().frame(egui::Frame::none().fill(BG).inner_margin(egui::Margin::same(8))).show(ctx,|ui|{
+            if self.page==Page::Overview {ui.heading("Mission Overview");ui.label("Spatio-Temporal & Physical Analog Discovery");ui.add_space(15.);ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");if ui.button("Open Terrain Workspace").clicked(){self.page=Page::Terrain;}}
+            else if self.page==Page::Discovery {ui.heading("Analog Discovery");ui.label("Earth analog candidate discovery for lunar and Martian environments.");ui.add_space(12.);ui.label("The discovery workflow is under active development. Terrain preprocessing and fingerprint extraction are available now.");if let Some(r)=&self.report{ui.label(format!("Current extraction: {} valid fingerprints · {:.1}% coverage",r.processed_cells(),r.coverage_fraction()*100.));}}
+            else {self.map_view(ui,ctx);}
         });
-
-        egui::CentralPanel::default().show(ctx, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                ui.add_space(12.0);
-
-                match self.page {
-                    Page::Overview => self.overview(ui),
-                    Page::Terrain => self.terrain(ui),
-                    Page::Discovery => self.discovery(ui),
-                }
-            });
-        });
+        ctx.request_repaint_after(std::time::Duration::from_millis(33));
     }
 }
-
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("S.T.A.R. — Geospatial Intelligence")
-            .with_inner_size([1450.0, 950.0])
-            .with_min_inner_size([1000.0, 700.0]),
+            .with_inner_size([1600., 1000.])
+            .with_min_inner_size([1100., 720.]),
         ..Default::default()
     };
-
     eframe::run_native(
         "S.T.A.R.",
         options,
         Box::new(|cc| {
-            let mut visuals = egui::Visuals::dark();
-            visuals.panel_fill = egui::Color32::from_rgb(15, 20, 29);
-            visuals.window_fill = egui::Color32::from_rgb(18, 24, 34);
-            visuals.extreme_bg_color = egui::Color32::from_rgb(9, 14, 22);
-            visuals.faint_bg_color = egui::Color32::from_rgb(24, 33, 46);
-            visuals.selection.bg_fill = egui::Color32::from_rgb(25, 103, 143);
-            visuals.selection.stroke =
-                egui::Stroke::new(1.0, egui::Color32::from_rgb(92, 190, 225));
-            visuals.widgets.noninteractive.bg_fill = egui::Color32::from_rgb(22, 30, 42);
-            visuals.widgets.inactive.bg_fill = egui::Color32::from_rgb(28, 39, 54);
-            visuals.widgets.hovered.bg_fill = egui::Color32::from_rgb(39, 57, 76);
-            visuals.widgets.active.bg_fill = egui::Color32::from_rgb(30, 111, 148);
-            cc.egui_ctx.set_visuals(visuals);
-
-            let mut style = (*cc.egui_ctx.style()).clone();
-            style.spacing.item_spacing = egui::vec2(10.0, 9.0);
-            style.spacing.button_padding = egui::vec2(13.0, 8.0);
-            style.spacing.window_margin = egui::Margin::same(16);
-            cc.egui_ctx.set_style(style);
-
+            let mut v = egui::Visuals::dark();
+            v.panel_fill = BG;
+            v.window_fill = PANEL;
+            v.extreme_bg_color = BG;
+            v.faint_bg_color = PANEL_2;
+            v.selection.bg_fill = egui::Color32::from_rgb(29, 91, 79);
+            v.selection.stroke = egui::Stroke::new(1., GREEN);
+            v.widgets.noninteractive.bg_fill = PANEL;
+            v.widgets.inactive.bg_fill = PANEL_2;
+            v.widgets.hovered.bg_fill = egui::Color32::from_rgb(23, 57, 72);
+            v.widgets.active.bg_fill = egui::Color32::from_rgb(31, 105, 85);
+            cc.egui_ctx.set_visuals(v);
+            let mut s = (*cc.egui_ctx.style()).clone();
+            s.spacing.item_spacing = egui::vec2(8., 7.);
+            s.spacing.button_padding = egui::vec2(10., 7.);
+            cc.egui_ctx.set_style(s);
             Ok(Box::new(StarApp::default()))
         }),
     )
