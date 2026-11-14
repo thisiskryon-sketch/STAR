@@ -1,0 +1,50 @@
+/target
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
+
+# --- S.T.A.R. local/generated files ---
+/target/
+/backups/
+/_star_ui_package/
+*.zip
+*.7z
+*.rar
+*.tif
+*.tiff
+*.vrt
+*.aux.xml
+*.ovr
+*.gpkg
+*.sqlite
+*.db
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# --- S.T.A.R. local/generated files ---
+/target/
+/backups/
+/_star_ui_package/
+*.zip
+*.7z
+*.rar
+*.tif
+*.tiff
+*.vrt
+*.aux.xml
+*.ovr
+*.gpkg
+*.sqlite
+*.db
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
