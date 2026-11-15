@@ -1,0 +1,31 @@
+{
+  "schema_version": "star-temp-0",
+  "note": "Районы южного полюса из ТЗ. Сверить с официальным списком NASA и наличием DEM; координаты и файлы заполнить после загрузки LOLA.",
+  "targets": [
+    {
+      "name": "Peak Near Shackleton / Connecting Ridge",
+      "body": "moon",
+      "dem_file": null
+    },
+    {
+      "name": "de Gerlache Rim",
+      "body": "moon",
+      "dem_file": null
+    },
+    {
+      "name": "Haworth",
+      "body": "moon",
+      "dem_file": null
+    },
+    {
+      "name": "Malapert Massif",
+      "body": "moon",
+      "dem_file": null
+    },
+    {
+      "name": "Mons Mouton",
+      "body": "moon",
+      "dem_file": null
+    }
+  ]
+}

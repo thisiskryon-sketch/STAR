@@ -1,0 +1,56 @@
+{
+  "schema_version": "star-temp-0",
+  "note": "Координаты ПРИБЛИЗИТЕЛЬНЫЕ (центр региона). Уточнить bbox перед выгрузкой DEM; каталог зафиксировать в git до расчётов.",
+  "regions": [
+    {
+      "name": "Atacama",
+      "role": "known_analog",
+      "center_lat": -24.5,
+      "center_lon": -69.25,
+      "approx": true
+    },
+    {
+      "name": "Haughton / Devon Island",
+      "role": "known_analog",
+      "center_lat": 75.4,
+      "center_lon": -89.7,
+      "approx": true,
+      "dem_note": "выше 60° с.ш.: ASTER GDEM, SRTM не покрывает"
+    },
+    {
+      "name": "Meteor Crater",
+      "role": "known_analog",
+      "center_lat": 35.03,
+      "center_lon": -111.02,
+      "approx": true
+    },
+    {
+      "name": "Death Valley",
+      "role": "known_analog",
+      "center_lat": 36.5,
+      "center_lon": -117.0,
+      "approx": true
+    },
+    {
+      "name": "Mauna Kea",
+      "role": "known_analog",
+      "center_lat": 19.82,
+      "center_lon": -155.47,
+      "approx": true
+    },
+    {
+      "name": "Amazon",
+      "role": "negative_control",
+      "center_lat": -3.0,
+      "center_lon": -60.0,
+      "approx": true
+    },
+    {
+      "name": "Congo",
+      "role": "negative_control",
+      "center_lat": 0.5,
+      "center_lon": 23.0,
+      "approx": true
+    }
+  ]
+}
