@@ -1,4 +1,6 @@
 use eframe::egui;
+use star_backend::export::{SourceMeta, records_from_tiles, write_cells};
+use star_backend::features::multiscale::extract_all_tiles;
 use star_backend::preprocessing::dem::RasterGrid;
 use star_backend::preprocessing::dem_batch::{TerrainExtractionReport, extract_terrain_batch};
 use star_backend::preprocessing::geotiff::{GeoTiffDem, load_geotiff};
@@ -49,32 +51,56 @@ impl Layer {
 struct StarApp {
     page: Page,
     radius: usize,
+
     dem: Option<GeoTiffDem>,
     report: Option<TerrainExtractionReport>,
     error: Option<String>,
+
     layer: Layer,
     texture: Option<egui::TextureHandle>,
     texture_layer: Option<Layer>,
     selected: Option<(usize, usize)>,
+
     zoom: f32,
     pan: egui::Vec2,
     show_grid: bool,
+
+    // Fingerprint export configuration
+    export_body: String,
+    export_region: String,
+    export_role: String,
+    export_dem_name: String,
+    export_tile_px: usize,
+    export_q_min: f64,
+    export_status: Option<String>,
 }
+
 impl Default for StarApp {
     fn default() -> Self {
         Self {
             page: Page::Terrain,
             radius: 2,
+
             dem: None,
             report: None,
             error: None,
+
             layer: Layer::Hillshade,
             texture: None,
             texture_layer: None,
             selected: None,
+
             zoom: 1.0,
             pan: egui::Vec2::ZERO,
             show_grid: false,
+
+            export_body: "earth".into(),
+            export_region: "Unknown".into(),
+            export_role: "candidate".into(),
+            export_dem_name: String::new(),
+            export_tile_px: 64,
+            export_q_min: 0.90,
+            export_status: None,
         }
     }
 }
@@ -144,6 +170,87 @@ impl StarApp {
             Err(e) => self.error = Some(e),
         }
     }
+    fn export_fingerprints(&mut self) {
+        self.export_status = None;
+
+        let prepared = (|| -> Result<Vec<star_backend::export::CellRecord>, String> {
+            let dem = self
+                .dem
+                .as_ref()
+                .ok_or_else(|| "Load a DEM before exporting fingerprints.".to_string())?;
+
+            if self.export_region.trim().is_empty() {
+                return Err("Region cannot be empty.".into());
+            }
+
+            let dem_name = if self.export_dem_name.trim().is_empty() {
+                dem.path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or("unnamed_dem")
+                    .to_string()
+            } else {
+                self.export_dem_name.trim().to_string()
+            };
+
+            let meta = SourceMeta {
+                body: self.export_body.clone(),
+                region: self.export_region.trim().to_string(),
+                role: self.export_role.clone(),
+                dem: dem_name,
+                epsg: dem.epsg,
+                origin_x: dem.origin_x,
+                origin_y: dem.origin_y,
+            };
+
+            let tiles = extract_all_tiles(&dem.grid, self.export_tile_px, self.export_q_min);
+
+            if tiles.is_empty() {
+                return Err("No valid tiles found. Reduce tile size or lower minimum Q.".into());
+            }
+
+            records_from_tiles(&tiles, &meta)
+        })();
+
+        let records = match prepared {
+            Ok(records) => records,
+            Err(error) => {
+                self.export_status = Some(format!("ERROR: {error}"));
+                return;
+            }
+        };
+
+        let count = records.len();
+
+        let average_q = if count > 0 {
+            records.iter().map(|cell| cell.quality_q).sum::<f64>() / count as f64
+        } else {
+            0.0
+        };
+
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("STAR cells JSON", &["json"])
+            .set_file_name("cells.json")
+            .save_file()
+        else {
+            self.export_status = Some("Export cancelled.".into());
+            return;
+        };
+
+        match write_cells(&path, records) {
+            Ok(()) => {
+                self.export_status = Some(format!(
+                    "SUCCESS | {} fingerprints | Mean Q: {:.3} | {}",
+                    count,
+                    average_q,
+                    path.display()
+                ));
+            }
+            Err(error) => {
+                self.export_status = Some(format!("EXPORT FAILED: {error}"));
+            }
+        }
+    }
     fn color_ramp(t: f64, stops: &[(f64, [u8; 3])]) -> egui::Color32 {
         let t = t.clamp(0.0, 1.0);
         let mut a = stops[0];
@@ -187,7 +294,7 @@ impl StarApp {
         let gy = (d - u) / (2.0 * dx);
         let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
         let shade =
-            ((0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15));
+            (0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15);
         let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
         let mut sum = 0.0;
         let mut sum2 = 0.0;
@@ -315,7 +422,7 @@ impl StarApp {
     fn panel_frame<R>(ui: &mut egui::Ui, add: impl FnOnce(&mut egui::Ui) -> R) -> R {
         egui::Frame::none()
             .fill(PANEL)
-            .stroke(egui::Stroke::new(1.0, LINE))
+            .stroke(egui::Stroke::new(1.0_f32, LINE))
             .inner_margin(egui::Margin::same(13))
             .show(ui, add)
             .inner
@@ -345,7 +452,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(BG)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1_f32, LINE)),
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
@@ -404,7 +511,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1_f32, LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical()
@@ -474,7 +581,7 @@ impl StarApp {
                             ui.add_space(6.);
                             for layer in Layer::all() {
                                 let active = self.layer == layer;
-                                let (color, desc) = match layer {
+                                let (_color, desc) = match layer {
                                     Layer::Elevation => {
                                         (egui::Color32::from_rgb(209, 165, 67), "DEM")
                                     }
@@ -560,8 +667,183 @@ impl StarApp {
                                 ui.colored_label(egui::Color32::LIGHT_RED, e);
                             }
                         });
+                        ui.add_space(7.);
+                        self.export_panel(ui);
                     });
             });
+    }
+    fn export_panel(&mut self, ui: &mut egui::Ui) {
+        Self::panel_frame(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("⬡  FINGERPRINT EXPORT")
+                        .strong()
+                        .size(12.),
+                );
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(egui::RichText::new("JSON / TEMP-0").size(8.).color(GREEN));
+                });
+            });
+
+            ui.add_space(8.);
+
+            ui.label(egui::RichText::new("PLANETARY BODY").size(9.).color(GREEN));
+
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.export_body, "earth".to_string(), "Earth");
+
+                ui.selectable_value(&mut self.export_body, "moon".to_string(), "Moon");
+            });
+
+            ui.add_space(5.);
+
+            ui.label(egui::RichText::new("REGION").size(9.).color(GREEN));
+
+            ui.add(
+                egui::TextEdit::singleline(&mut self.export_region)
+                    .hint_text("e.g. Iceland Highlands")
+                    .desired_width(f32::INFINITY),
+            );
+
+            ui.add_space(5.);
+
+            ui.label(egui::RichText::new("DATASET ROLE").size(9.).color(GREEN));
+
+            egui::ComboBox::from_id_source("star-export-role")
+                .selected_text(match self.export_role.as_str() {
+                    "known_analog" => "Known analog",
+                    "negative_control" => "Negative control",
+                    "target" => "Target",
+                    _ => "Candidate",
+                })
+                .width(f32::INFINITY)
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut self.export_role,
+                        "candidate".to_string(),
+                        "Candidate",
+                    );
+
+                    ui.selectable_value(
+                        &mut self.export_role,
+                        "known_analog".to_string(),
+                        "Known analog",
+                    );
+
+                    ui.selectable_value(
+                        &mut self.export_role,
+                        "negative_control".to_string(),
+                        "Negative control",
+                    );
+
+                    ui.selectable_value(&mut self.export_role, "target".to_string(), "Target");
+                });
+
+            ui.add_space(5.);
+
+            ui.label(egui::RichText::new("DEM IDENTIFIER").size(9.).color(GREEN));
+
+            ui.add(
+                egui::TextEdit::singleline(&mut self.export_dem_name)
+                    .hint_text("Empty = use source filename")
+                    .desired_width(f32::INFINITY),
+            );
+
+            ui.add_space(10.);
+            ui.separator();
+
+            ui.label(egui::RichText::new("TILE CONFIGURATION").strong().size(10.));
+
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new("Tile size").size(10.).color(MUTED));
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(
+                        egui::RichText::new(format!("{} px", self.export_tile_px))
+                            .strong()
+                            .color(egui::Color32::WHITE),
+                    );
+                });
+            });
+
+            ui.add(egui::Slider::new(&mut self.export_tile_px, 16..=256).text("pixels"));
+
+            ui.add_space(4.);
+
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("Minimum quality Q")
+                        .size(10.)
+                        .color(MUTED),
+                );
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(
+                        egui::RichText::new(format!("{:.2}", self.export_q_min))
+                            .strong()
+                            .color(GREEN),
+                    );
+                });
+            });
+
+            ui.add(egui::Slider::new(&mut self.export_q_min, 0.50..=1.00).fixed_decimals(2));
+
+            ui.add_space(8.);
+
+            ui.label(
+                egui::RichText::new("Multiscale features: 1x / 3x / 9x")
+                    .size(9.)
+                    .color(MUTED),
+            );
+
+            ui.label(
+                egui::RichText::new(
+                    "Shadow metrics will be populated when the illumination module is integrated.",
+                )
+                .size(9.)
+                .color(MUTED),
+            );
+
+            ui.add_space(9.);
+
+            let can_export = self.dem.is_some();
+
+            if ui
+                .add_enabled(
+                    can_export,
+                    egui::Button::new(
+                        egui::RichText::new("GENERATE & EXPORT CELLS.JSON")
+                            .strong()
+                            .color(egui::Color32::WHITE),
+                    )
+                    .fill(egui::Color32::from_rgb(24, 91, 75)),
+                )
+                .clicked()
+            {
+                self.export_fingerprints();
+            }
+
+            if !can_export {
+                ui.label(
+                    egui::RichText::new("Load a DEM to enable export.")
+                        .size(9.)
+                        .color(MUTED),
+                );
+            }
+
+            if let Some(status) = &self.export_status {
+                ui.add_space(7.);
+
+                let success = status.starts_with("SUCCESS");
+
+                ui.label(egui::RichText::new(status).size(9.).color(if success {
+                    GREEN
+                } else {
+                    egui::Color32::LIGHT_RED
+                }));
+            }
+        });
     }
     fn profile_chart(ui: &mut egui::Ui, g: &RasterGrid) {
         let row = g.height / 2;
@@ -581,7 +863,7 @@ impl StarApp {
                     egui::pos2(rect.left() + 5., y),
                     egui::pos2(rect.right() - 5., y),
                 ],
-                egui::Stroke::new(1., LINE),
+                egui::Stroke::new(1_f32, LINE),
             );
         }
         let pts: Vec<_> = vals
@@ -596,7 +878,7 @@ impl StarApp {
                 )
             })
             .collect();
-        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8, GREEN)));
+        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8_f32, GREEN)));
         p.text(
             rect.left_top() + egui::vec2(7., 5.),
             egui::Align2::LEFT_TOP,
@@ -620,7 +902,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1_f32, LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
@@ -788,35 +1070,35 @@ impl StarApp {
                         egui::pos2(x, map_rect.top()),
                         egui::pos2(x, map_rect.bottom()),
                     ],
-                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
                 );
                 painter.line_segment(
                     [
                         egui::pos2(map_rect.left(), y),
                         egui::pos2(map_rect.right(), y),
                     ],
-                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
                 );
             }
         }
         painter.rect_stroke(
             map_rect,
             2.,
-            egui::Stroke::new(1., egui::Color32::from_rgb(91, 126, 137)),
+            egui::Stroke::new(1_f32, egui::Color32::from_rgb(91, 126, 137)),
             egui::StrokeKind::Inside,
         );
         if let Some((x, y)) = self.selected {
             let px = map_rect.left() + map_rect.width() * x as f32 / gw as f32;
             let py = map_rect.top() + map_rect.height() * y as f32 / gh as f32;
             let pos = egui::pos2(px, py);
-            painter.circle_stroke(pos, 8., egui::Stroke::new(2., egui::Color32::WHITE));
+            painter.circle_stroke(pos, 8., egui::Stroke::new(2_f32, egui::Color32::WHITE));
             painter.line_segment(
                 [pos - egui::vec2(13., 0.), pos + egui::vec2(13., 0.)],
-                egui::Stroke::new(1., egui::Color32::WHITE),
+                egui::Stroke::new(1_f32, egui::Color32::WHITE),
             );
             painter.line_segment(
                 [pos - egui::vec2(0., 13.), pos + egui::vec2(0., 13.)],
-                egui::Stroke::new(1., egui::Color32::WHITE),
+                egui::Stroke::new(1_f32, egui::Color32::WHITE),
             );
         }
         if response.clicked() {
@@ -878,7 +1160,7 @@ impl StarApp {
         painter.circle_stroke(
             compass,
             15.,
-            egui::Stroke::new(1., egui::Color32::from_white_alpha(140)),
+            egui::Stroke::new(1_f32, egui::Color32::from_white_alpha(140)),
         );
         painter.text(
             compass,
@@ -892,14 +1174,129 @@ impl StarApp {
 
 impl eframe::App for StarApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.topbar(ctx);
-        self.left_panel(ctx);
-        self.right_panel(ctx);
-        egui::CentralPanel::default().frame(egui::Frame::none().fill(BG).inner_margin(egui::Margin::same(8))).show(ctx,|ui|{
-            if self.page==Page::Overview {ui.heading("Mission Overview");ui.label("Spatio-Temporal & Physical Analog Discovery");ui.add_space(15.);ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");if ui.button("Open Terrain Workspace").clicked(){self.page=Page::Terrain;}}
-            else if self.page==Page::Discovery {ui.heading("Analog Discovery");ui.label("Earth analog candidate discovery for lunar and Martian environments.");ui.add_space(12.);ui.label("The discovery workflow is under active development. Terrain preprocessing and fingerprint extraction are available now.");if let Some(r)=&self.report{ui.label(format!("Current extraction: {} valid fingerprints · {:.1}% coverage",r.processed_cells(),r.coverage_fraction()*100.));}}
-            else {self.map_view(ui,ctx);}
-        });
+        egui::CentralPanel::default()
+            .frame(egui::Frame::new().fill(BG).inner_margin(egui::Margin::same(8)))
+            .show(ctx, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(egui::RichText::new("S.T.A.R.").size(22.0).strong());
+                    ui.separator();
+                    ui.selectable_value(&mut self.page, Page::Overview, "Overview");
+                    ui.selectable_value(&mut self.page, Page::Terrain, "Terrain Analysis");
+                    ui.selectable_value(&mut self.page, Page::Discovery, "Analog Discovery");
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if ui.button("Load GeoTIFF").clicked() { self.load_file(); }
+                        if ui.button("Generate demo").clicked() { self.generate_demo(); }
+                        if ui.add_enabled(self.dem.is_some(), egui::Button::new("Run analysis")).clicked() { self.run_analysis(); }
+                    });
+                });
+                ui.separator();
+
+                let panel_height = ui.available_height();
+                let map_width = (ui.available_width() - 591.0).max(180.0);
+                ui.horizontal(|ui| {
+                    // Project tools and export controls stay in the same workspace;
+                    // the export group can be collapsed to keep short screens usable.
+                    ui.allocate_ui_with_layout(egui::vec2(315.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
+                        egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+                            Self::panel_frame(ui, |ui| {
+                                ui.label(egui::RichText::new("PROJECT INFORMATION").strong().color(GREEN));
+                                if let Some(dem) = &self.dem {
+                                    let (lo, hi) = dem.grid.min_max().unwrap_or((0.0, 0.0));
+                                    ui.label(format!("Elevation: {lo:.1} to {hi:.1} m"));
+                                    ui.label(format!("{} x {} | {}", dem.grid.width, dem.grid.height, dem.crs_label));
+                                    ui.label(format!("Resolution: {:.1} m", dem.pixel_size_m));
+                                } else { ui.label(egui::RichText::new("No terrain dataset loaded").color(MUTED)); }
+                            });
+                            ui.add_space(7.0);
+                            Self::panel_frame(ui, |ui| {
+                                ui.label(egui::RichText::new("INFORMATION LAYERS").strong().color(GREEN));
+                                for layer in Layer::all() {
+                                    ui.selectable_value(&mut self.layer, layer, layer.label());
+                                }
+                                ui.horizontal(|ui| {
+                                    if ui.button("Load DEM").clicked() { self.load_file(); }
+                                    if ui.button("Demo").clicked() { self.generate_demo(); }
+                                });
+                                if ui.button("Run terrain analysis").clicked() { self.run_analysis(); }
+                                ui.add(egui::Slider::new(&mut self.radius, 1..=8).text("Radius (px)"));
+                            });
+                            ui.add_space(7.0);
+                            egui::CollapsingHeader::new("Elevation profile").default_open(false).show(ui, |ui| {
+                                if let Some(dem) = &self.dem { Self::profile_chart(ui, &dem.grid); }
+                                else { ui.label("Load a DEM to calculate profile"); }
+                            });
+                            if self.page == Page::Discovery {
+                                self.export_panel(ui);
+                            } else {
+                                egui::CollapsingHeader::new("Fingerprint export").default_open(false).show(ui, |ui| self.export_panel(ui));
+                            }
+                        });
+                    });
+
+                    ui.allocate_ui_with_layout(egui::vec2(map_width, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
+                        egui::Frame::new().fill(BG).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+                            match self.page {
+                                Page::Terrain => self.map_view(ui, ctx),
+                                Page::Overview => {
+                                    ui.heading("Mission Overview");
+                                    ui.label("Spatio-Temporal & Physical Analog Discovery");
+                                    ui.add_space(15.0);
+                                    ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");
+                                    ui.add_space(12.0);
+                                    if ui.button("Open Terrain Workspace").clicked() { self.page = Page::Terrain; }
+                                    if self.dem.is_none() && ui.button("Generate demo terrain").clicked() { self.generate_demo(); self.page = Page::Terrain; }
+                                }
+                                Page::Discovery => {
+                                    ui.heading("Analog Discovery");
+                                    ui.label("Extract terrain fingerprints here, then export from the left panel.");
+                                    ui.add_space(8.0);
+                                    if let Some(report) = &self.report {
+                                        ui.label(format!("{} valid fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0));
+                                    } else if self.dem.is_none() { ui.label("Load a GeoTIFF or generate demo terrain to begin."); }
+                                    ui.add_space(8.0);
+                                    ui.label(egui::RichText::new("Planetary analog ranking needs reference datasets and is not included in this build.").small().color(MUTED));
+                                }
+                            }
+                        });
+                    });
+
+                    ui.allocate_ui_with_layout(egui::vec2(260.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
+                        egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+                            Self::panel_frame(ui, |ui| {
+                                ui.label(egui::RichText::new("POINT INSPECTOR").strong().color(GREEN));
+                                if let (Some(dem), Some((x, y))) = (&self.dem, self.selected) {
+                                    ui.heading(format!("{x} , {y}"));
+                                    if let Some(z) = dem.grid.get(x, y) { Self::detail(ui, "Elevation", format!("{z:.2} m")); }
+                                    if let Some((slope, _, roughness, curvature)) = Self::sample_metric(&dem.grid, x, y) {
+                                        Self::detail(ui, "Slope", format!("{slope:.2} deg"));
+                                        Self::detail(ui, "Roughness", format!("{roughness:.2} m"));
+                                        Self::detail(ui, "Curvature", format!("{curvature:.6}"));
+                                    }
+                                } else { ui.label("Click the map to inspect a raster cell."); }
+                            });
+                            ui.add_space(7.0);
+                            Self::panel_frame(ui, |ui| {
+                                ui.label(egui::RichText::new("MAP CONTROLS").strong().color(GREEN));
+                                ui.horizontal(|ui| {
+                                    if ui.button("Zoom +").clicked() { self.zoom = (self.zoom * 1.25).clamp(0.35, 8.0); }
+                                    if ui.button("Zoom -").clicked() { self.zoom = (self.zoom / 1.25).clamp(0.35, 8.0); }
+                                    if ui.button("Reset").clicked() { self.zoom = 1.0; self.pan = egui::Vec2::ZERO; }
+                                });
+                                ui.checkbox(&mut self.show_grid, "Show grid");
+                                ui.label(egui::RichText::new("Drag to pan; scroll to zoom; click to inspect.").size(10.0).color(MUTED));
+                            });
+                            ui.add_space(7.0);
+                            Self::panel_frame(ui, |ui| {
+                                ui.label(egui::RichText::new("ANALYSIS STATUS").strong().color(GREEN));
+                                if let Some(report) = &self.report { ui.label(format!("{} fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0)); }
+                                else { ui.label("Run terrain analysis to see results."); }
+                                if let Some(error) = &self.error { ui.colored_label(egui::Color32::LIGHT_RED, error); }
+                                if let Some(status) = &self.export_status { ui.label(status); }
+                            });
+                        });
+                    });
+                });
+            });
         ctx.request_repaint_after(std::time::Duration::from_millis(33));
     }
 }
@@ -921,7 +1318,7 @@ fn main() -> eframe::Result<()> {
             v.extreme_bg_color = BG;
             v.faint_bg_color = PANEL_2;
             v.selection.bg_fill = egui::Color32::from_rgb(29, 91, 79);
-            v.selection.stroke = egui::Stroke::new(1., GREEN);
+            v.selection.stroke = egui::Stroke::new(1_f32, GREEN);
             v.widgets.noninteractive.bg_fill = PANEL;
             v.widgets.inactive.bg_fill = PANEL_2;
             v.widgets.hovered.bg_fill = egui::Color32::from_rgb(23, 57, 72);
