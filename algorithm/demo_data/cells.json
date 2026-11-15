@@ -1,0 +1,2290 @@
+[
+  {
+    "id": "KAM_POS_1",
+    "region": "Kamchatka_Volcanic",
+    "lat": 55.8,
+    "lon": 160.3,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.96,
+    "vertical_uncertainty_m": 0.45,
+    "features": {
+      "rms_slope_1x": 11.2,
+      "rms_slope_3x": 9.52,
+      "rms_slope_9x": 7.279999999999999,
+      "roughness_1x": 0.33,
+      "roughness_3x": 0.46199999999999997,
+      "roughness_9x": 0.7260000000000001,
+      "shadow_obstruction_1deg": 0.6,
+      "shadow_obstruction_2deg": 0.42,
+      "shadow_obstruction_3deg": 0.27
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "KAM_POS_2",
+    "region": "Kamchatka_Volcanic",
+    "lat": 55.949999999999996,
+    "lon": 160.45000000000002,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.96,
+    "vertical_uncertainty_m": 0.45,
+    "features": {
+      "rms_slope_1x": 11.45,
+      "rms_slope_3x": 9.7325,
+      "rms_slope_9x": 7.4425,
+      "roughness_1x": 0.35000000000000003,
+      "roughness_3x": 0.49,
+      "roughness_9x": 0.7700000000000001,
+      "shadow_obstruction_1deg": 0.612,
+      "shadow_obstruction_2deg": 0.42839999999999995,
+      "shadow_obstruction_3deg": 0.2754
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "KAM_POS_3",
+    "region": "Kamchatka_Volcanic",
+    "lat": 56.099999999999994,
+    "lon": 160.60000000000002,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.96,
+    "vertical_uncertainty_m": 0.45,
+    "features": {
+      "rms_slope_1x": 11.7,
+      "rms_slope_3x": 9.944999999999999,
+      "rms_slope_9x": 7.6049999999999995,
+      "roughness_1x": 0.37,
+      "roughness_3x": 0.518,
+      "roughness_9x": 0.8140000000000001,
+      "shadow_obstruction_1deg": 0.624,
+      "shadow_obstruction_2deg": 0.43679999999999997,
+      "shadow_obstruction_3deg": 0.2808
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "KAM_POS_4",
+    "region": "Kamchatka_Volcanic",
+    "lat": 56.25,
+    "lon": 160.75,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.96,
+    "vertical_uncertainty_m": 0.45,
+    "features": {
+      "rms_slope_1x": 11.95,
+      "rms_slope_3x": 10.157499999999999,
+      "rms_slope_9x": 7.7675,
+      "roughness_1x": 0.39,
+      "roughness_3x": 0.5459999999999999,
+      "roughness_9x": 0.8580000000000001,
+      "shadow_obstruction_1deg": 0.636,
+      "shadow_obstruction_2deg": 0.4452,
+      "shadow_obstruction_3deg": 0.2862
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "ICE_POS_1",
+    "region": "Iceland_Highlands",
+    "lat": 64.8,
+    "lon": -16.8,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.94,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 12.0,
+      "rms_slope_3x": 10.2,
+      "rms_slope_9x": 7.800000000000001,
+      "roughness_1x": 0.37,
+      "roughness_3x": 0.518,
+      "roughness_9x": 0.8140000000000001,
+      "shadow_obstruction_1deg": 0.64,
+      "shadow_obstruction_2deg": 0.44799999999999995,
+      "shadow_obstruction_3deg": 0.28800000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {},
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "ICE_POS_2",
+    "region": "Iceland_Highlands",
+    "lat": 64.95,
+    "lon": -16.95,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.94,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 11.7,
+      "rms_slope_3x": 9.944999999999999,
+      "rms_slope_9x": 7.6049999999999995,
+      "roughness_1x": 0.37,
+      "roughness_3x": 0.518,
+      "roughness_9x": 0.8140000000000001,
+      "shadow_obstruction_1deg": 0.63,
+      "shadow_obstruction_2deg": 0.44099999999999995,
+      "shadow_obstruction_3deg": 0.28350000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {},
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "ICE_POS_3",
+    "region": "Iceland_Highlands",
+    "lat": 65.1,
+    "lon": -17.1,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.94,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 11.4,
+      "rms_slope_3x": 9.69,
+      "rms_slope_9x": 7.41,
+      "roughness_1x": 0.37,
+      "roughness_3x": 0.518,
+      "roughness_9x": 0.8140000000000001,
+      "shadow_obstruction_1deg": 0.62,
+      "shadow_obstruction_2deg": 0.434,
+      "shadow_obstruction_3deg": 0.279
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {},
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "DEVON_1",
+    "region": "Devon_Island_Arctic",
+    "lat": 75.3,
+    "lon": -89.2,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.4,
+    "features": {
+      "rms_slope_1x": 5.6,
+      "rms_slope_3x": 4.76,
+      "rms_slope_9x": 3.6399999999999997,
+      "roughness_1x": 0.12,
+      "roughness_3x": 0.16799999999999998,
+      "roughness_9x": 0.264,
+      "shadow_obstruction_1deg": 0.58,
+      "shadow_obstruction_2deg": 0.40599999999999997,
+      "shadow_obstruction_3deg": 0.261
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "DEVON_2",
+    "region": "Devon_Island_Arctic",
+    "lat": 75.42,
+    "lon": -89.60000000000001,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.4,
+    "features": {
+      "rms_slope_1x": 5.8,
+      "rms_slope_3x": 4.93,
+      "rms_slope_9x": 3.77,
+      "roughness_1x": 0.12,
+      "roughness_3x": 0.16799999999999998,
+      "roughness_9x": 0.264,
+      "shadow_obstruction_1deg": 0.59,
+      "shadow_obstruction_2deg": 0.413,
+      "shadow_obstruction_3deg": 0.2655
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "DEVON_3",
+    "region": "Devon_Island_Arctic",
+    "lat": 75.53999999999999,
+    "lon": -90.0,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.4,
+    "features": {
+      "rms_slope_1x": 6.0,
+      "rms_slope_3x": 5.1,
+      "rms_slope_9x": 3.9000000000000004,
+      "roughness_1x": 0.12,
+      "roughness_3x": 0.16799999999999998,
+      "roughness_9x": 0.264,
+      "shadow_obstruction_1deg": 0.6,
+      "shadow_obstruction_2deg": 0.42,
+      "shadow_obstruction_3deg": 0.27
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "PUNA_1",
+    "region": "Puna_Plateau",
+    "lat": -24.2,
+    "lon": -67.6,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 14.6,
+      "rms_slope_3x": 12.41,
+      "rms_slope_9x": 9.49,
+      "roughness_1x": 0.55,
+      "roughness_3x": 0.77,
+      "roughness_9x": 1.2100000000000002,
+      "shadow_obstruction_1deg": 0.45,
+      "shadow_obstruction_2deg": 0.315,
+      "shadow_obstruction_3deg": 0.2025
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "PUNA_2",
+    "region": "Puna_Plateau",
+    "lat": -24.349999999999998,
+    "lon": -67.44999999999999,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 14.799999999999999,
+      "rms_slope_3x": 12.579999999999998,
+      "rms_slope_9x": 9.62,
+      "roughness_1x": 0.55,
+      "roughness_3x": 0.77,
+      "roughness_9x": 1.2100000000000002,
+      "shadow_obstruction_1deg": 0.46,
+      "shadow_obstruction_2deg": 0.322,
+      "shadow_obstruction_3deg": 0.20700000000000002
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "PUNA_3",
+    "region": "Puna_Plateau",
+    "lat": -24.5,
+    "lon": -67.3,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 15.0,
+      "rms_slope_3x": 12.75,
+      "rms_slope_9x": 9.75,
+      "roughness_1x": 0.55,
+      "roughness_3x": 0.77,
+      "roughness_9x": 1.2100000000000002,
+      "shadow_obstruction_1deg": 0.47000000000000003,
+      "shadow_obstruction_2deg": 0.329,
+      "shadow_obstruction_3deg": 0.21150000000000002
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_01",
+    "region": "Generic_Hills_A",
+    "lat": 42.348438825700214,
+    "lon": -86.99340589388981,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.667525738097899,
+      "rms_slope_3x": 6.517396877383214,
+      "rms_slope_9x": 4.983891729763634,
+      "roughness_1x": 0.11038906202342336,
+      "roughness_3x": 0.15454468683279268,
+      "roughness_9x": 0.24285593645153142,
+      "shadow_obstruction_1deg": 0.20694136610655128,
+      "shadow_obstruction_2deg": 0.1448589562745859,
+      "shadow_obstruction_3deg": 0.09312361474794809
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_02",
+    "region": "Generic_Hills_B",
+    "lat": 48.942790850933555,
+    "lon": -86.01397164079785,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.201432436864188,
+      "rms_slope_3x": 3.5712175713345595,
+      "rms_slope_9x": 2.7309310839617225,
+      "roughness_1x": 0.08749657590164817,
+      "roughness_3x": 0.12249520626230742,
+      "roughness_9x": 0.192492466983626,
+      "shadow_obstruction_1deg": 0.13154275928273496,
+      "shadow_obstruction_2deg": 0.09207993149791446,
+      "shadow_obstruction_3deg": 0.05919424167723073
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_03",
+    "region": "Generic_Hills_C",
+    "lat": 44.09540343693814,
+    "lon": -82.79612935397927,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.269966658742237,
+      "rms_slope_3x": 2.7794716599309015,
+      "rms_slope_9x": 2.125478328182454,
+      "roughness_1x": 0.050457522934450896,
+      "roughness_3x": 0.07064053210823125,
+      "roughness_9x": 0.11100655045579198,
+      "shadow_obstruction_1deg": 0.1373005437987102,
+      "shadow_obstruction_2deg": 0.09611038065909713,
+      "shadow_obstruction_3deg": 0.061785244709419596
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_04",
+    "region": "Generic_Hills_D",
+    "lat": 40.01113083297031,
+    "lon": -96.69066737515264,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.309487153725323,
+      "rms_slope_3x": 3.6630640806665244,
+      "rms_slope_9x": 2.80116664992146,
+      "roughness_1x": 0.06420624589696947,
+      "roughness_3x": 0.08988874425575724,
+      "roughness_9x": 0.14125374097333285,
+      "shadow_obstruction_1deg": 0.0885495375954859,
+      "shadow_obstruction_2deg": 0.06198467631684012,
+      "shadow_obstruction_3deg": 0.03984729191796865
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_05",
+    "region": "Generic_Hills_A",
+    "lat": 41.13080367159417,
+    "lon": -81.68409251878218,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.4590157194754148,
+      "rms_slope_3x": 2.9401633615541023,
+      "rms_slope_9x": 2.2483602176590196,
+      "roughness_1x": 0.08886601077640183,
+      "roughness_3x": 0.12441241508696255,
+      "roughness_9x": 0.19550522370808404,
+      "shadow_obstruction_1deg": 0.2236537490252155,
+      "shadow_obstruction_2deg": 0.15655762431765086,
+      "shadow_obstruction_3deg": 0.10064418706134698
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_06",
+    "region": "Generic_Hills_B",
+    "lat": 42.46164661818791,
+    "lon": -78.42568620351369,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.960588111503557,
+      "rms_slope_3x": 3.3664998947780234,
+      "rms_slope_9x": 2.574382272477312,
+      "roughness_1x": 0.139698070440051,
+      "roughness_3x": 0.1955772986160714,
+      "roughness_9x": 0.3073357549681122,
+      "shadow_obstruction_1deg": 0.08772908675801556,
+      "shadow_obstruction_2deg": 0.06141036073061089,
+      "shadow_obstruction_3deg": 0.03947808904110701
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_07",
+    "region": "Generic_Hills_C",
+    "lat": 40.55315284640383,
+    "lon": -60.56489663402297,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 5.427788901633869,
+      "rms_slope_3x": 4.613620566388789,
+      "rms_slope_9x": 3.5280627860620153,
+      "roughness_1x": 0.07723509240901022,
+      "roughness_3x": 0.1081291293726143,
+      "roughness_9x": 0.1699172032998225,
+      "shadow_obstruction_1deg": 0.22092835597677218,
+      "shadow_obstruction_2deg": 0.15464984918374053,
+      "shadow_obstruction_3deg": 0.09941776018954748
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_08",
+    "region": "Generic_Hills_D",
+    "lat": 48.29349889509736,
+    "lon": -63.55999643160088,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.088108003025016,
+      "rms_slope_3x": 5.174891802571263,
+      "rms_slope_9x": 3.9572702019662604,
+      "roughness_1x": 0.1305003495927302,
+      "roughness_3x": 0.18270048942982228,
+      "roughness_9x": 0.2871007691040065,
+      "shadow_obstruction_1deg": 0.10245059388181915,
+      "shadow_obstruction_2deg": 0.0717154157172734,
+      "shadow_obstruction_3deg": 0.04610276724681862
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_09",
+    "region": "Generic_Hills_A",
+    "lat": 44.02829879620882,
+    "lon": -97.85040290322577,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.32507467471979,
+      "rms_slope_3x": 3.6763134735118217,
+      "rms_slope_9x": 2.8112985385678635,
+      "roughness_1x": 0.10318400946450373,
+      "roughness_3x": 0.1444576132503052,
+      "roughness_9x": 0.22700482082190823,
+      "shadow_obstruction_1deg": 0.2081449114842836,
+      "shadow_obstruction_2deg": 0.14570143803899852,
+      "shadow_obstruction_3deg": 0.09366521016792763
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_10",
+    "region": "Generic_Hills_B",
+    "lat": 40.02251973831119,
+    "lon": -68.07217842711167,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 5.1313270706782665,
+      "rms_slope_3x": 4.361628010076527,
+      "rms_slope_9x": 3.3353625959408735,
+      "roughness_1x": 0.10030684421157615,
+      "roughness_3x": 0.1404295818962066,
+      "roughness_9x": 0.22067505726546754,
+      "shadow_obstruction_1deg": 0.08528182945533552,
+      "shadow_obstruction_2deg": 0.05969728061873486,
+      "shadow_obstruction_3deg": 0.03837682325490099
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_11",
+    "region": "Generic_Hills_C",
+    "lat": 44.130165756315165,
+    "lon": -70.11729950416046,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.753676298037989,
+      "rms_slope_3x": 4.040624853332291,
+      "rms_slope_9x": 3.0898895937246933,
+      "roughness_1x": 0.0710032334634016,
+      "roughness_3x": 0.09940452684876222,
+      "roughness_9x": 0.15620711361948353,
+      "shadow_obstruction_1deg": 0.2312691860673387,
+      "shadow_obstruction_2deg": 0.1618884302471371,
+      "shadow_obstruction_3deg": 0.10407113373030243
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_12",
+    "region": "Generic_Hills_D",
+    "lat": 47.93965363257136,
+    "lon": -81.30289621535395,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.149551716647965,
+      "rms_slope_3x": 5.22711895915077,
+      "rms_slope_9x": 3.9972086158211773,
+      "roughness_1x": 0.09632283276684162,
+      "roughness_3x": 0.13485196587357826,
+      "roughness_9x": 0.21191023208705156,
+      "shadow_obstruction_1deg": 0.11183598903989866,
+      "shadow_obstruction_2deg": 0.07828519232792906,
+      "shadow_obstruction_3deg": 0.0503261950679544
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_13",
+    "region": "Generic_Hills_A",
+    "lat": 49.5089055556654,
+    "lon": -89.54816817182729,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.954313768884278,
+      "rms_slope_3x": 3.3611667035516364,
+      "rms_slope_9x": 2.5703039497747806,
+      "roughness_1x": 0.08210611268355514,
+      "roughness_3x": 0.11494855775697718,
+      "roughness_9x": 0.18063344790382133,
+      "shadow_obstruction_1deg": 0.18026978175513636,
+      "shadow_obstruction_2deg": 0.12618884722859544,
+      "shadow_obstruction_3deg": 0.08112140178981136
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_14",
+    "region": "Generic_Hills_B",
+    "lat": 45.29679440900202,
+    "lon": -98.76978436664838,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.061780368538882,
+      "rms_slope_3x": 2.6025133132580494,
+      "rms_slope_9x": 1.9901572395502733,
+      "roughness_1x": 0.07558879710283335,
+      "roughness_3x": 0.10582431594396668,
+      "roughness_9x": 0.16629535362623338,
+      "shadow_obstruction_1deg": 0.10771812845041354,
+      "shadow_obstruction_2deg": 0.07540268991528946,
+      "shadow_obstruction_3deg": 0.048473157802686094
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_15",
+    "region": "Generic_Hills_C",
+    "lat": 48.07944308010472,
+    "lon": -85.98301852032695,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.913489509895212,
+      "rms_slope_3x": 5.8764660834109295,
+      "rms_slope_9x": 4.4937681814318875,
+      "roughness_1x": 0.06924722422950112,
+      "roughness_3x": 0.09694611392130156,
+      "roughness_9x": 0.15234389330490247,
+      "shadow_obstruction_1deg": 0.11104142457672724,
+      "shadow_obstruction_2deg": 0.07772899720370906,
+      "shadow_obstruction_3deg": 0.04996864105952726
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_16",
+    "region": "Generic_Hills_D",
+    "lat": 45.37270095723996,
+    "lon": -60.470468755646046,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.713160537265832,
+      "rms_slope_3x": 3.156186456675957,
+      "rms_slope_9x": 2.413554349222791,
+      "roughness_1x": 0.12946627941106958,
+      "roughness_3x": 0.18125279117549742,
+      "roughness_9x": 0.2848258147043531,
+      "shadow_obstruction_1deg": 0.22770334934163794,
+      "shadow_obstruction_2deg": 0.15939234453914655,
+      "shadow_obstruction_3deg": 0.10246650720373708
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_17",
+    "region": "Generic_Hills_A",
+    "lat": 46.66080932875697,
+    "lon": -88.39044923264493,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 5.596156517604989,
+      "rms_slope_3x": 4.7567330399642405,
+      "rms_slope_9x": 3.6375017364432427,
+      "roughness_1x": 0.06892573060469943,
+      "roughness_3x": 0.0964960228465792,
+      "roughness_9x": 0.15163660733033876,
+      "shadow_obstruction_1deg": 0.08545696556766635,
+      "shadow_obstruction_2deg": 0.05981987589736645,
+      "shadow_obstruction_3deg": 0.03845563450544986
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_18",
+    "region": "Generic_Hills_B",
+    "lat": 48.25348699551209,
+    "lon": -74.61971713926182,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.709604862897514,
+      "rms_slope_3x": 6.553164133462887,
+      "rms_slope_9x": 5.011243160883384,
+      "roughness_1x": 0.06062428755963312,
+      "roughness_3x": 0.08487400258348636,
+      "roughness_9x": 0.13337343263119286,
+      "shadow_obstruction_1deg": 0.20150461449256385,
+      "shadow_obstruction_2deg": 0.14105323014479468,
+      "shadow_obstruction_3deg": 0.09067707652165373
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_19",
+    "region": "Generic_Hills_C",
+    "lat": 41.30508904861172,
+    "lon": -88.92712273357856,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.083131350092722,
+      "rms_slope_3x": 6.020661647578813,
+      "rms_slope_9x": 4.604035377560269,
+      "roughness_1x": 0.09695611983915926,
+      "roughness_3x": 0.13573856777482296,
+      "roughness_9x": 0.2133034636461504,
+      "shadow_obstruction_1deg": 0.1264021933852974,
+      "shadow_obstruction_2deg": 0.08848153536970818,
+      "shadow_obstruction_3deg": 0.05688098702338383
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_20",
+    "region": "Generic_Hills_D",
+    "lat": 48.49185574567001,
+    "lon": -79.54276909300468,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.879016265727893,
+      "rms_slope_3x": 6.697163825868709,
+      "rms_slope_9x": 5.12136057272313,
+      "roughness_1x": 0.05868748698895368,
+      "roughness_3x": 0.08216248178453514,
+      "roughness_9x": 0.12911247137569812,
+      "shadow_obstruction_1deg": 0.1597015008072748,
+      "shadow_obstruction_2deg": 0.11179105056509235,
+      "shadow_obstruction_3deg": 0.07186567536327367
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_21",
+    "region": "Generic_Hills_A",
+    "lat": 43.95272743381115,
+    "lon": -81.37288999349435,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.9143235295269045,
+      "rms_slope_3x": 6.727175000097868,
+      "rms_slope_9x": 5.144310294192488,
+      "roughness_1x": 0.051788674065488816,
+      "roughness_3x": 0.07250414369168434,
+      "roughness_9x": 0.11393508294407541,
+      "shadow_obstruction_1deg": 0.24661234234829438,
+      "shadow_obstruction_2deg": 0.17262863964380606,
+      "shadow_obstruction_3deg": 0.11097555405673247
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_22",
+    "region": "Generic_Hills_B",
+    "lat": 46.80790212576506,
+    "lon": -71.4595563423139,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.146393059719917,
+      "rms_slope_3x": 2.6744341007619292,
+      "rms_slope_9x": 2.045155488817946,
+      "roughness_1x": 0.09875695097762349,
+      "roughness_3x": 0.13825973136867287,
+      "roughness_9x": 0.2172652921507717,
+      "shadow_obstruction_1deg": 0.11842062988281975,
+      "shadow_obstruction_2deg": 0.08289444091797382,
+      "shadow_obstruction_3deg": 0.05328928344726889
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_23",
+    "region": "Generic_Hills_C",
+    "lat": 42.869426741169,
+    "lon": -75.78675881449676,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.5305135036252295,
+      "rms_slope_3x": 5.550936478081445,
+      "rms_slope_9x": 4.2448337773563996,
+      "roughness_1x": 0.1071347847524538,
+      "roughness_3x": 0.1499886986534353,
+      "roughness_9x": 0.23569652645539838,
+      "shadow_obstruction_1deg": 0.2188228037182796,
+      "shadow_obstruction_2deg": 0.15317596260279573,
+      "shadow_obstruction_3deg": 0.09847026167322583
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_24",
+    "region": "Generic_Hills_D",
+    "lat": 46.254995027443854,
+    "lon": -79.14968147719081,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.479593343017613,
+      "rms_slope_3x": 6.357654341564971,
+      "rms_slope_9x": 4.861735672961449,
+      "roughness_1x": 0.14205359278040713,
+      "roughness_3x": 0.19887502989256997,
+      "roughness_9x": 0.31251790411689573,
+      "shadow_obstruction_1deg": 0.14550989931305547,
+      "shadow_obstruction_2deg": 0.10185692951913883,
+      "shadow_obstruction_3deg": 0.06547945469087496
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_25",
+    "region": "Generic_Hills_A",
+    "lat": 47.794964268941705,
+    "lon": -73.828600199844,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.32174566977533,
+      "rms_slope_3x": 3.6734838193090305,
+      "rms_slope_9x": 2.809134685353965,
+      "roughness_1x": 0.14025866361308859,
+      "roughness_3x": 0.196362129058324,
+      "roughness_9x": 0.3085690599487949,
+      "shadow_obstruction_1deg": 0.2373897332801247,
+      "shadow_obstruction_2deg": 0.16617281329608727,
+      "shadow_obstruction_3deg": 0.10682537997605611
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_26",
+    "region": "Generic_Hills_B",
+    "lat": 45.50198504221284,
+    "lon": -84.95271920588107,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.161839671124679,
+      "rms_slope_3x": 6.087563720455977,
+      "rms_slope_9x": 4.655195786231041,
+      "roughness_1x": 0.1489724785794847,
+      "roughness_3x": 0.20856147001127856,
+      "roughness_9x": 0.3277394528748664,
+      "shadow_obstruction_1deg": 0.10722444689375313,
+      "shadow_obstruction_2deg": 0.07505711282562719,
+      "shadow_obstruction_3deg": 0.04825100110218891
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_27",
+    "region": "Generic_Hills_C",
+    "lat": 43.1843582520983,
+    "lon": -71.6572114990829,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.978119163281184,
+      "rms_slope_3x": 3.3814012887890064,
+      "rms_slope_9x": 2.5857774561327695,
+      "roughness_1x": 0.07696888368131335,
+      "roughness_3x": 0.10775643715383869,
+      "roughness_9x": 0.1693315440988894,
+      "shadow_obstruction_1deg": 0.06538585475815697,
+      "shadow_obstruction_2deg": 0.04577009833070988,
+      "shadow_obstruction_3deg": 0.029423634641170638
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_28",
+    "region": "Generic_Hills_D",
+    "lat": 48.13078064249049,
+    "lon": -65.76051181316336,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.5229300881896455,
+      "rms_slope_3x": 3.8444905749611986,
+      "rms_slope_9x": 2.9399045573232696,
+      "roughness_1x": 0.06571438120910239,
+      "roughness_3x": 0.09200013369274335,
+      "roughness_9x": 0.14457163866002526,
+      "shadow_obstruction_1deg": 0.2212734142486948,
+      "shadow_obstruction_2deg": 0.15489138997408633,
+      "shadow_obstruction_3deg": 0.09957303641191266
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_29",
+    "region": "Generic_Hills_A",
+    "lat": 40.86663638213636,
+    "lon": -60.466482082031675,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.434839979862954,
+      "rms_slope_3x": 5.46961398288351,
+      "rms_slope_9x": 4.18264598691092,
+      "roughness_1x": 0.05187497302147093,
+      "roughness_3x": 0.07262496223005929,
+      "roughness_9x": 0.11412494064723605,
+      "shadow_obstruction_1deg": 0.21106893292665935,
+      "shadow_obstruction_2deg": 0.14774825304866154,
+      "shadow_obstruction_3deg": 0.0949810198169967
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_30",
+    "region": "Generic_Hills_B",
+    "lat": 42.62178179026517,
+    "lon": -93.00913950040622,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.371048463994792,
+      "rms_slope_3x": 6.265391194395573,
+      "rms_slope_9x": 4.791181501596615,
+      "roughness_1x": 0.08627253997092715,
+      "roughness_3x": 0.120781555959298,
+      "roughness_9x": 0.18979958793603977,
+      "shadow_obstruction_1deg": 0.18222064514312603,
+      "shadow_obstruction_2deg": 0.12755445160018822,
+      "shadow_obstruction_3deg": 0.08199929031440671
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_31",
+    "region": "Generic_Hills_C",
+    "lat": 41.44317249649051,
+    "lon": -82.14182139196403,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.238291152862078,
+      "rms_slope_3x": 2.7525474799327663,
+      "rms_slope_9x": 2.1048892493603506,
+      "roughness_1x": 0.13744470276715498,
+      "roughness_3x": 0.19242258387401695,
+      "roughness_9x": 0.302378346087741,
+      "shadow_obstruction_1deg": 0.0595170329545816,
+      "shadow_obstruction_2deg": 0.04166192306820712,
+      "shadow_obstruction_3deg": 0.02678266482956172
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_32",
+    "region": "Generic_Hills_D",
+    "lat": 49.89626475003419,
+    "lon": -66.34686203274086,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.475636736852014,
+      "rms_slope_3x": 6.354291226324212,
+      "rms_slope_9x": 4.859163878953809,
+      "roughness_1x": 0.06877567874144691,
+      "roughness_3x": 0.09628595023802566,
+      "roughness_9x": 0.15130649323118323,
+      "shadow_obstruction_1deg": 0.05481960141709952,
+      "shadow_obstruction_2deg": 0.03837372099196966,
+      "shadow_obstruction_3deg": 0.024668820637694783
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_33",
+    "region": "Generic_Hills_A",
+    "lat": 42.720722122747944,
+    "lon": -68.25059795161735,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.037186136455993,
+      "rms_slope_3x": 3.4316082159875942,
+      "rms_slope_9x": 2.6241709886963958,
+      "roughness_1x": 0.11974935072586225,
+      "roughness_3x": 0.16764909101620715,
+      "roughness_9x": 0.263448571596897,
+      "shadow_obstruction_1deg": 0.07377646933723135,
+      "shadow_obstruction_2deg": 0.051643528536061946,
+      "shadow_obstruction_3deg": 0.03319941120175411
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_34",
+    "region": "Generic_Hills_B",
+    "lat": 49.76805250434959,
+    "lon": -85.7716250531027,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 7.192982128896913,
+      "rms_slope_3x": 6.114034809562376,
+      "rms_slope_9x": 4.675438383782994,
+      "roughness_1x": 0.10228323483311255,
+      "roughness_3x": 0.14319652876635755,
+      "roughness_9x": 0.22502311663284763,
+      "shadow_obstruction_1deg": 0.13207953983362175,
+      "shadow_obstruction_2deg": 0.09245567788353522,
+      "shadow_obstruction_3deg": 0.059435792925129786
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_35",
+    "region": "Generic_Hills_C",
+    "lat": 40.45837861096362,
+    "lon": -80.47052101475761,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 4.5741120101412855,
+      "rms_slope_3x": 3.8879952086200924,
+      "rms_slope_9x": 2.973172806591836,
+      "roughness_1x": 0.05818466638828556,
+      "roughness_3x": 0.08145853294359978,
+      "roughness_9x": 0.12800626605422824,
+      "shadow_obstruction_1deg": 0.06496432163606147,
+      "shadow_obstruction_2deg": 0.04547502514524303,
+      "shadow_obstruction_3deg": 0.029233944736227663
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_36",
+    "region": "Generic_Hills_D",
+    "lat": 47.31026841340316,
+    "lon": -68.55419854597285,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 3.3954728491337978,
+      "rms_slope_3x": 2.886151921763728,
+      "rms_slope_9x": 2.2070573519369687,
+      "roughness_1x": 0.07320064871774107,
+      "roughness_3x": 0.10248090820483749,
+      "roughness_9x": 0.16104142717903036,
+      "shadow_obstruction_1deg": 0.16964932258433224,
+      "shadow_obstruction_2deg": 0.11875452580903256,
+      "shadow_obstruction_3deg": 0.07634219516294952
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_37",
+    "region": "Generic_Hills_A",
+    "lat": 46.46714194366431,
+    "lon": -96.0828017173978,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.500064000996224,
+      "rms_slope_3x": 5.52505440084679,
+      "rms_slope_9x": 4.225041600647545,
+      "roughness_1x": 0.08559621399811623,
+      "roughness_3x": 0.11983469959736272,
+      "roughness_9x": 0.18831167079585573,
+      "shadow_obstruction_1deg": 0.08243962129678459,
+      "shadow_obstruction_2deg": 0.057707734907749206,
+      "shadow_obstruction_3deg": 0.037097829583553066
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_38",
+    "region": "Generic_Hills_B",
+    "lat": 40.28265830783334,
+    "lon": -76.31185234397319,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.319658056148346,
+      "rms_slope_3x": 5.371709347726094,
+      "rms_slope_9x": 4.107777736496425,
+      "roughness_1x": 0.12108153842426277,
+      "roughness_3x": 0.16951415379396786,
+      "roughness_9x": 0.2663793845333781,
+      "shadow_obstruction_1deg": 0.06391835802204537,
+      "shadow_obstruction_2deg": 0.04474285061543176,
+      "shadow_obstruction_3deg": 0.02876326110992042
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_39",
+    "region": "Generic_Hills_C",
+    "lat": 41.395572832958,
+    "lon": -62.20999643675811,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.456964881553193,
+      "rms_slope_3x": 5.4884201493202145,
+      "rms_slope_9x": 4.197027173009576,
+      "roughness_1x": 0.14256987392875603,
+      "roughness_3x": 0.19959782350025843,
+      "roughness_9x": 0.3136537226432633,
+      "shadow_obstruction_1deg": 0.08952921685585576,
+      "shadow_obstruction_2deg": 0.06267045179909903,
+      "shadow_obstruction_3deg": 0.04028814758513509
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "GEN_40",
+    "region": "Generic_Hills_D",
+    "lat": 48.68396271562854,
+    "lon": -89.70710350210882,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.93,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 6.603421356217674,
+      "rms_slope_3x": 5.612908152785023,
+      "rms_slope_9x": 4.292223881541489,
+      "roughness_1x": 0.05879064854210943,
+      "roughness_3x": 0.0823069079589532,
+      "roughness_9x": 0.12933942679264074,
+      "shadow_obstruction_1deg": 0.12122704878302136,
+      "shadow_obstruction_2deg": 0.08485893414811495,
+      "shadow_obstruction_3deg": 0.05455217195235961
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "RANK_NEG_FLAT_1",
+    "region": "Alluvial_Plains",
+    "lat": 25.0,
+    "lon": 15.0,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.98,
+    "vertical_uncertainty_m": 0.3,
+    "features": {
+      "rms_slope_1x": 2.5,
+      "rms_slope_3x": 2.125,
+      "rms_slope_9x": 1.625,
+      "roughness_1x": 0.05,
+      "roughness_3x": 0.06999999999999999,
+      "roughness_9x": 0.11000000000000001,
+      "shadow_obstruction_1deg": 0.05,
+      "shadow_obstruction_2deg": 0.034999999999999996,
+      "shadow_obstruction_3deg": 0.022500000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "RANK_NEG_FLAT_2",
+    "region": "Alluvial_Plains",
+    "lat": 25.2,
+    "lon": 15.2,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.98,
+    "vertical_uncertainty_m": 0.3,
+    "features": {
+      "rms_slope_1x": 2.7,
+      "rms_slope_3x": 2.295,
+      "rms_slope_9x": 1.7550000000000001,
+      "roughness_1x": 0.05,
+      "roughness_3x": 0.06999999999999999,
+      "roughness_9x": 0.11000000000000001,
+      "shadow_obstruction_1deg": 0.05,
+      "shadow_obstruction_2deg": 0.034999999999999996,
+      "shadow_obstruction_3deg": 0.022500000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "RANK_NEG_FLAT_3",
+    "region": "Alluvial_Plains",
+    "lat": 25.4,
+    "lon": 15.4,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.98,
+    "vertical_uncertainty_m": 0.3,
+    "features": {
+      "rms_slope_1x": 2.9,
+      "rms_slope_3x": 2.465,
+      "rms_slope_9x": 1.885,
+      "roughness_1x": 0.05,
+      "roughness_3x": 0.06999999999999999,
+      "roughness_9x": 0.11000000000000001,
+      "shadow_obstruction_1deg": 0.05,
+      "shadow_obstruction_2deg": 0.034999999999999996,
+      "shadow_obstruction_3deg": 0.022500000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "RANK_NEG_FLAT_4",
+    "region": "Alluvial_Plains",
+    "lat": 25.6,
+    "lon": 15.6,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.98,
+    "vertical_uncertainty_m": 0.3,
+    "features": {
+      "rms_slope_1x": 3.1,
+      "rms_slope_3x": 2.635,
+      "rms_slope_9x": 2.015,
+      "roughness_1x": 0.05,
+      "roughness_3x": 0.06999999999999999,
+      "roughness_9x": 0.11000000000000001,
+      "shadow_obstruction_1deg": 0.05,
+      "shadow_obstruction_2deg": 0.034999999999999996,
+      "shadow_obstruction_3deg": 0.022500000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "OUTLIER_ARTIFACT_1",
+    "region": "Isolated_Spire",
+    "lat": -23.5,
+    "lon": -67.8,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.86,
+    "vertical_uncertainty_m": 1.8,
+    "features": {
+      "rms_slope_1x": 23.5,
+      "rms_slope_3x": 19.974999999999998,
+      "rms_slope_9x": 15.275,
+      "roughness_1x": 1.45,
+      "roughness_3x": 2.03,
+      "roughness_9x": 3.19,
+      "shadow_obstruction_1deg": 0.92,
+      "shadow_obstruction_2deg": 0.644,
+      "shadow_obstruction_3deg": 0.41400000000000003
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 2.5,
+      "RmsSlope3x": 2.5,
+      "RmsSlope9x": 2.5,
+      "Roughness1x": 0.3,
+      "Roughness3x": 0.3,
+      "Roughness9x": 0.3,
+      "ShadowObstruction1Deg": 0.1,
+      "ShadowObstruction2Deg": 0.1,
+      "ShadowObstruction3Deg": 0.1
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "QC_FAIL_LOW_COVERAGE",
+    "region": "Cloudy_Basin",
+    "lat": 10.0,
+    "lon": 20.0,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.55,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 11.5,
+      "rms_slope_3x": 9.775,
+      "rms_slope_9x": 7.4750000000000005,
+      "roughness_1x": 0.35,
+      "roughness_3x": 0.48999999999999994,
+      "roughness_9x": 0.77,
+      "shadow_obstruction_1deg": 0.62,
+      "shadow_obstruction_2deg": 0.434,
+      "shadow_obstruction_3deg": 0.279
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "QC_FAIL_RESOLUTION",
+    "region": "Coarse_Global_Grid",
+    "lat": 12.0,
+    "lon": 22.0,
+    "resolution_m": 30.0,
+    "valid_pixel_ratio": 0.99,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 11.5,
+      "rms_slope_3x": 9.775,
+      "rms_slope_9x": 7.4750000000000005,
+      "roughness_1x": 0.35,
+      "roughness_3x": 0.48999999999999994,
+      "roughness_9x": 0.77,
+      "shadow_obstruction_1deg": 0.62,
+      "shadow_obstruction_2deg": 0.434,
+      "shadow_obstruction_3deg": 0.279
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  },
+  {
+    "id": "HC_FAIL_STEEP_CLIFF",
+    "region": "Steep_Canyon",
+    "lat": 36.0,
+    "lon": -112.0,
+    "resolution_m": 2.0,
+    "valid_pixel_ratio": 0.95,
+    "vertical_uncertainty_m": 0.5,
+    "features": {
+      "rms_slope_1x": 34.0,
+      "rms_slope_3x": 9.775,
+      "rms_slope_9x": 7.4750000000000005,
+      "roughness_1x": 0.35,
+      "roughness_3x": 0.48999999999999994,
+      "roughness_9x": 0.77,
+      "shadow_obstruction_1deg": 0.62,
+      "shadow_obstruction_2deg": 0.434,
+      "shadow_obstruction_3deg": 0.279
+    },
+    "provenance": {
+      "source_id": "SYNTHETIC_GENERATOR",
+      "source_version": "star-synth-4.1",
+      "processing_version": "none",
+      "observation_window_utc": null
+    },
+    "feature_uncertainty": {
+      "RmsSlope1x": 0.8,
+      "RmsSlope3x": 0.8,
+      "RmsSlope9x": 0.8,
+      "Roughness1x": 0.04,
+      "Roughness3x": 0.04,
+      "Roughness9x": 0.04,
+      "ShadowObstruction1Deg": 0.03,
+      "ShadowObstruction2Deg": 0.03,
+      "ShadowObstruction3Deg": 0.03
+    },
+    "data_origin": "Synthetic"
+  }
+]

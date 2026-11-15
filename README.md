@@ -73,7 +73,7 @@ Build and test:
 
 ```bash
 cargo fmt --check
-cargo test
+cargo test --workspace
 cargo build --release
 ```
 
@@ -84,6 +84,10 @@ cargo run --release
 ```
 
 On Windows, these commands can be executed from PowerShell in the project directory.
+
+### Mission discovery with real DEM data
+
+The v0.6.2 mission-discovery engine is included in `algorithm/star-core` and is called directly by the desktop app's **Analog Discovery** page. It is kept separate from the existing terrain-analysis library. See [the integration guide](algorithm/INTEGRATION.md) for the NASA DEM workflow, input bundle contract, and import command. The files in `algorithm/demo_data` are synthetic logic-demo inputs, not scientific results.
 
 ## Working with elevation data
 
@@ -122,6 +126,10 @@ The output CRS must be appropriate for the geographic area being analyzed. Do no
 
 ```text
 STAR/
+├── algorithm/
+│   ├── star-core/       # bundled v0.6.2 discovery algorithm
+│   ├── star-cli/        # input importer and CLI runner
+│   └── real_data_template/
 ├── data/
 │   ├── earth/
 │   ├── known_analogs/

@@ -1,0 +1,143 @@
+[
+  {
+    "target_id": "LUNAR_SP_SHACKLETON_01",
+    "region_name": "Shackleton_Connecting_Ridge",
+    "joint_status": {
+      "JointObservedWithSupport": {
+        "supporting_cells": 10,
+        "independent_sites": 10
+      }
+    },
+    "lead_site": {
+      "UndecidedUncertaintyUnknown": {
+        "sites": [
+          "Kamchatka_Volcanic",
+          "Iceland_Highlands"
+        ]
+      }
+    },
+    "campaign_assets": [
+      "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+      "FIELD:Devon_Island_Arctic:DEVON_3",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 1.0,
+    "critical_reducible_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV"
+    ],
+    "irreducible_until_flight": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "first_action": {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+    }
+  },
+  {
+    "target_id": "SYNTH_DE_GERLACHE_RIM",
+    "region_name": "de Gerlache Rim (SYNTHETIC values)",
+    "joint_status": {
+      "JointObservedWithSupport": {
+        "supporting_cells": 10,
+        "independent_sites": 10
+      }
+    },
+    "lead_site": {
+      "UndecidedUncertaintyUnknown": {
+        "sites": [
+          "Kamchatka_Volcanic",
+          "Iceland_Highlands"
+        ]
+      }
+    },
+    "campaign_assets": [
+      "FIELD:Devon_Island_Arctic:DEVON_3",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 1.0,
+    "critical_reducible_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV"
+    ],
+    "irreducible_until_flight": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "first_action": {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+    }
+  },
+  {
+    "target_id": "SYNTH_MALAPERT",
+    "region_name": "Malapert Massif (SYNTHETIC values)",
+    "joint_status": {
+      "JointObservedWithSupport": {
+        "supporting_cells": 7,
+        "independent_sites": 7
+      }
+    },
+    "lead_site": {
+      "TiedWithinUncertainty": {
+        "sites": [
+          "Puna_Plateau",
+          "Kamchatka_Volcanic"
+        ]
+      }
+    },
+    "campaign_assets": [
+      "FIELD:Kamchatka_Volcanic:KAM_POS_4",
+      "LAB:LOWSUN_LIGHT_RIG",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 1.0,
+    "critical_reducible_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV"
+    ],
+    "irreducible_until_flight": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "first_action": {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Evidence that 'sustained_low_sun_illumination' results from LOWSUN_LIGHT_RIG transfer to the target"
+    }
+  },
+  {
+    "target_id": "SYNTH_HAWORTH",
+    "region_name": "Haworth (SYNTHETIC values)",
+    "joint_status": {
+      "OutsideMarginalEnvelope": {
+        "unreachable_requirements": [
+          "REQ_ROUGH_1X"
+        ]
+      }
+    },
+    "lead_site": "NoCandidate",
+    "campaign_assets": [
+      "LAB:LOWSUN_LIGHT_RIG",
+      "LAB:SOILBIN_TILTBED",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 0.6666666666666666,
+    "critical_reducible_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV"
+    ],
+    "irreducible_until_flight": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "first_action": {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Evidence that 'sustained_low_sun_illumination' results from LOWSUN_LIGHT_RIG transfer to the target"
+    }
+  }
+]

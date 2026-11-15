@@ -1,0 +1,3796 @@
+{
+  "manifest": {
+    "run_id": "star-EXP_ROVER_LOWSUN_MOBILITY_01-0bfc09219b7760ca",
+    "timestamp_utc": "2026-11-15T16:22:56Z",
+    "code_revision": "star-cli 0.6.2",
+    "dataset_hash": "fnv1a64:0bfc09219b7760ca",
+    "calibration_version": "earth-qc-p01-p99@0bfc09219b7760ca",
+    "random_seed": 42,
+    "is_synthetic_demo": true,
+    "validation_protocol": "H1 leave-one-positive-region-out (P@k, R@k, R-precision, NDCG@k); H2 independent Gaussian noise"
+  },
+  "parameters": {
+    "min_valid_pixel_ratio": 0.85,
+    "max_vertical_uncertainty_m": 5.0,
+    "epsilon_mission_distance": 1.0,
+    "epsilon_is_hard_constraint": false,
+    "knn_k": 5,
+    "min_knn_support": 2,
+    "spatial_thinning_radius_km": 1.0,
+    "joint_support_radius": 0.1,
+    "max_resolution_ratio": 4.0,
+    "clean_ray_ratio_threshold": 0.85,
+    "top_n_dossiers": 10,
+    "min_quality_for_supported_rarity": 0.75,
+    "hard_constraint_sigma_margin": 2.0,
+    "sensitivity_trials": 200,
+    "exact_check_max_assets": 16,
+    "synthetic_evidence_policy": "Strict"
+  },
+  "mission_spec": {
+    "mission_id": "DEMO_LUNAR_SOUTH_POLE",
+    "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+    "target_body": "Moon",
+    "target_region": "Shackleton_Connecting_Ridge",
+    "target_profile_id": "LUNAR_SP_SHACKLETON_01",
+    "objective": "Rover traction and navigation on rough slopes under low sun (synthetic demo)",
+    "fallback_profile": "P3CombinedTerrainShadow",
+    "required_parameters": [
+      {
+        "requirement_id": "REQ_SLOPE_1X",
+        "feature": "RmsSlope1x",
+        "target_value": 11.5,
+        "acceptable_min": 7.0,
+        "acceptable_max": 16.0,
+        "max_uncertainty": 1.5,
+        "weight": 1.0,
+        "unit": "deg",
+        "criticality": "High"
+      },
+      {
+        "requirement_id": "REQ_ROUGH_1X",
+        "feature": "Roughness1x",
+        "target_value": 0.35,
+        "acceptable_min": 0.15,
+        "acceptable_max": 0.6,
+        "max_uncertainty": 0.1,
+        "weight": 1.0,
+        "unit": "m",
+        "criticality": "Normal"
+      },
+      {
+        "requirement_id": "REQ_SHADOW_1DEG",
+        "feature": "ShadowObstruction1Deg",
+        "target_value": 0.62,
+        "acceptable_min": 0.4,
+        "acceptable_max": 0.85,
+        "max_uncertainty": 0.1,
+        "weight": 1.0,
+        "unit": "ratio",
+        "criticality": "High"
+      }
+    ],
+    "hard_constraints": [
+      {
+        "constraint_id": "HC_SAFE_SLOPE",
+        "feature": "RmsSlope1x",
+        "min_allowed": 2.0,
+        "max_allowed": 24.0,
+        "max_resolution_mismatch_ratio": 4.0
+      }
+    ],
+    "transfer_requirements": [
+      {
+        "requirement_id": "TR_TRACTION",
+        "engineering_decision": "Wheel slip threshold calibration",
+        "required_mechanism_id": "granular_regolith_shear",
+        "requires_validated_correction_model": true,
+        "depends_on_parameters": [
+          "REQ_SLOPE_1X",
+          "REQ_ROUGH_1X"
+        ],
+        "weight": 1.0,
+        "criticality": "MissionCritical"
+      },
+      {
+        "requirement_id": "TR_LOWSUN_NAV",
+        "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+        "required_mechanism_id": "sustained_low_sun_illumination",
+        "requires_validated_correction_model": false,
+        "depends_on_parameters": [
+          "REQ_SHADOW_1DEG"
+        ],
+        "weight": 1.0,
+        "criticality": "MissionCritical"
+      },
+      {
+        "requirement_id": "TR_VACUUM_OPTICS",
+        "engineering_decision": "Optics and dust behaviour in vacuum",
+        "required_mechanism_id": "high_vacuum_radiative_transfer",
+        "requires_validated_correction_model": false,
+        "depends_on_parameters": [],
+        "weight": 1.0,
+        "criticality": "High"
+      },
+      {
+        "requirement_id": "TR_GRAVITY_SINKAGE",
+        "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+        "required_mechanism_id": "sustained_lunar_gravity",
+        "requires_validated_correction_model": true,
+        "depends_on_parameters": [],
+        "weight": 1.0,
+        "criticality": "MissionCritical"
+      }
+    ],
+    "mechanisms": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "description": "Wheel-soil shear in loose granular material",
+        "venues": [
+          "FieldSite",
+          "Laboratory"
+        ],
+        "field_min_abs_latitude_deg": null,
+        "note": "Volcanic tephra fields and simulant soil bins approximate shear; 1/6 g needs a correction model.",
+        "requires_field_time_window": false
+      },
+      {
+        "mechanism_id": "sustained_low_sun_illumination",
+        "description": "Multi-hour sun elevation below ~3° with long shadows sweeping in azimuth",
+        "venues": [
+          "FieldSite",
+          "Laboratory"
+        ],
+        "field_min_abs_latitude_deg": 66.0,
+        "note": "Declared condition (input data): sustained in the field only at high latitude, in specific seasonal windows.",
+        "requires_field_time_window": true
+      },
+      {
+        "mechanism_id": "high_vacuum_radiative_transfer",
+        "description": "Radiative-only heat exchange and dust behaviour in high vacuum",
+        "venues": [
+          "Laboratory"
+        ],
+        "field_min_abs_latitude_deg": null,
+        "note": "Only thermal-vacuum chambers; no field site has vacuum.",
+        "requires_field_time_window": false
+      },
+      {
+        "mechanism_id": "sustained_lunar_gravity",
+        "description": "Continuous 1/6 g loading of soil and vehicle",
+        "venues": [],
+        "field_min_abs_latitude_deg": null,
+        "note": "Parabolic flights give seconds only; sustained 1/6 g is irreducible on Earth.",
+        "requires_field_time_window": false
+      }
+    ]
+  },
+  "target_id": "LUNAR_SP_SHACKLETON_01",
+  "consistency_warnings": [],
+  "envelope": {
+    "qc_valid_cells": 59,
+    "marginal": [
+      {
+        "requirement_id": "REQ_SLOPE_1X",
+        "feature": "RmsSlope1x",
+        "cells_within_range": 20,
+        "observed_min": 2.5,
+        "observed_max": 34.0
+      },
+      {
+        "requirement_id": "REQ_ROUGH_1X",
+        "feature": "Roughness1x",
+        "cells_within_range": 11,
+        "observed_min": 0.05,
+        "observed_max": 1.45
+      },
+      {
+        "requirement_id": "REQ_SHADOW_1DEG",
+        "feature": "ShadowObstruction1Deg",
+        "cells_within_range": 14,
+        "observed_min": 0.05,
+        "observed_max": 0.92
+      }
+    ],
+    "joint_status": {
+      "JointObservedWithSupport": {
+        "supporting_cells": 10,
+        "independent_sites": 10
+      }
+    },
+    "best_partial_joint_sets": [
+      {
+        "requirement_ids": [
+          "REQ_SLOPE_1X",
+          "REQ_ROUGH_1X",
+          "REQ_SHADOW_1DEG"
+        ],
+        "supporting_cells": 10,
+        "independent_sites": 10,
+        "example_cell_id": "ICE_POS_1"
+      }
+    ],
+    "nearest_cell_id": "KAM_POS_2",
+    "nearest_mission_distance": 0.015824915824915964,
+    "mechanism": {
+      "per_mechanism": [
+        {
+          "mechanism_id": "granular_regolith_shear",
+          "venues": [
+            "FieldSite",
+            "Laboratory"
+          ],
+          "field_min_abs_latitude_deg": null,
+          "irreducible_on_earth": false,
+          "required_by": [
+            "TR_TRACTION"
+          ]
+        },
+        {
+          "mechanism_id": "high_vacuum_radiative_transfer",
+          "venues": [
+            "Laboratory"
+          ],
+          "field_min_abs_latitude_deg": null,
+          "irreducible_on_earth": false,
+          "required_by": [
+            "TR_VACUUM_OPTICS"
+          ]
+        },
+        {
+          "mechanism_id": "sustained_low_sun_illumination",
+          "venues": [
+            "FieldSite",
+            "Laboratory"
+          ],
+          "field_min_abs_latitude_deg": 66.0,
+          "irreducible_on_earth": false,
+          "required_by": [
+            "TR_LOWSUN_NAV"
+          ]
+        },
+        {
+          "mechanism_id": "sustained_lunar_gravity",
+          "venues": [],
+          "field_min_abs_latitude_deg": null,
+          "irreducible_on_earth": true,
+          "required_by": [
+            "TR_GRAVITY_SINKAGE"
+          ]
+        }
+      ],
+      "unknown_mechanisms": [],
+      "irreducible_mechanisms": [
+        "sustained_lunar_gravity"
+      ],
+      "venues_hosting_all_reducible": [
+        "Laboratory"
+      ],
+      "single_venue_reproduces_everything": false
+    }
+  },
+  "scales": {
+    "calibration_version": "earth-qc-p01-p99@0bfc09219b7760ca",
+    "sample_count": 59,
+    "p01": {
+      "RmsSlope1x": 2.7,
+      "RmsSlope3x": 2.295,
+      "RmsSlope9x": 1.755,
+      "Roughness1x": 0.05,
+      "Roughness3x": 0.06999999999999999,
+      "Roughness9x": 0.11,
+      "ShadowObstruction1Deg": 0.05,
+      "ShadowObstruction2Deg": 0.034999999999999996,
+      "ShadowObstruction3Deg": 0.022500000000000003
+    },
+    "p99": {
+      "RmsSlope1x": 23.5,
+      "RmsSlope3x": 12.75,
+      "RmsSlope9x": 9.75,
+      "Roughness1x": 0.55,
+      "Roughness3x": 0.77,
+      "Roughness9x": 1.2100000000000002,
+      "ShadowObstruction1Deg": 0.64,
+      "ShadowObstruction2Deg": 0.4479999999999999,
+      "ShadowObstruction3Deg": 0.28800000000000003
+    },
+    "degenerate_features": []
+  },
+  "rejections": [
+    {
+      "cell_id": "HC_FAIL_STEEP_CLIFF",
+      "stage_qc": false,
+      "reasons": [
+        {
+          "HardConstraintViolation": {
+            "constraint_id": "HC_SAFE_SLOPE",
+            "feature": "RmsSlope1x",
+            "observed": 34.0,
+            "min_allowed": 2.0,
+            "max_allowed": 24.0
+          }
+        }
+      ],
+      "what_would_change_decision": [
+        "RmsSlope1x = 34.000 deg must be [2, 24] (HC_SAFE_SLOPE); only a different site or a mission-approved relaxation changes this."
+      ]
+    },
+    {
+      "cell_id": "QC_FAIL_LOW_COVERAGE",
+      "stage_qc": true,
+      "reasons": [
+        {
+          "LowValidPixelCoverage": {
+            "observed": 0.55,
+            "required": 0.85
+          }
+        }
+      ],
+      "what_would_change_decision": [
+        "Valid-pixel coverage must rise from 0.55 to >= 0.85 (re-acquire or gap-fill the DEM)."
+      ]
+    },
+    {
+      "cell_id": "QC_FAIL_RESOLUTION",
+      "stage_qc": true,
+      "reasons": [
+        {
+          "IncompatibleSpatialResolution": {
+            "cell_res_m": 30.0,
+            "target_res_m": 2.0,
+            "max_ratio": 4.0
+          }
+        }
+      ],
+      "what_would_change_decision": [
+        "Resolution 30.0 m vs target 2.0 m exceeds ratio 4.0; resample or use a DEM closer to 2.0 m."
+      ]
+    }
+  ],
+  "epsilon_cutoff_count": 45,
+  "epsilon_sensitivity_counts": [
+    [
+      0.5,
+      7
+    ],
+    [
+      1.0,
+      13
+    ],
+    [
+      1.5,
+      25
+    ],
+    [
+      2.0,
+      54
+    ],
+    [
+      3.0,
+      58
+    ]
+  ],
+  "mode_rankings": [
+    {
+      "mode": "MissionMatch",
+      "status": "Ranked",
+      "eligibility_rule": "Cells within epsilon (QC-valid, hard constraints passed) on Pareto fronts of (-d_mission, data quality); cells beyond epsilon follow as near-misses ordered by d_mission (front 0).",
+      "objective_names": [
+        "-d_mission",
+        "data_quality"
+      ],
+      "entries": [
+        {
+          "cell_id": "KAM_POS_2",
+          "region": "Kamchatka_Volcanic",
+          "d_mission": 0.015824915824915964,
+          "pareto_front_rank": 1,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "ICE_POS_3",
+          "region": "Iceland_Highlands",
+          "d_mission": 0.03407407407407407,
+          "pareto_front_rank": 2,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "KAM_POS_3",
+          "region": "Kamchatka_Volcanic",
+          "d_mission": 0.04727858293075682,
+          "pareto_front_rank": 2,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "ICE_POS_2",
+          "region": "Iceland_Highlands",
+          "d_mission": 0.05597423510466987,
+          "pareto_front_rank": 3,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "KAM_POS_1",
+          "region": "Kamchatka_Volcanic",
+          "d_mission": 0.08585858585858587,
+          "pareto_front_rank": 3,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "ICE_POS_1",
+          "region": "Iceland_Highlands",
+          "d_mission": 0.09268921095008058,
+          "pareto_front_rank": 4,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "KAM_POS_4",
+          "region": "Kamchatka_Volcanic",
+          "d_mission": 0.10985507246376813,
+          "pareto_front_rank": 4,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "PUNA_3",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7531986531986533,
+          "pareto_front_rank": 5,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "DEVON_3",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.821043771043771,
+          "pareto_front_rank": 5,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "PUNA_2",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7535353535353536,
+          "pareto_front_rank": 6,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "DEVON_2",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.8510101010101011,
+          "pareto_front_rank": 6,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "PUNA_1",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7538720538720538,
+          "pareto_front_rank": 7,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "DEVON_1",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.8809764309764311,
+          "pareto_front_rank": 7,
+          "within_epsilon": true,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_01",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.309084960647487,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_21",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.3283634162668643,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_24",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.363309640863421,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_23",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.3807297063789712,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_18",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.3971467816585272,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_30",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.4086960814548783,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_26",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.4333237348020986,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_20",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.451163840845726,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_25",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.4610039622909354,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_34",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.471173060595109,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_29",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.4916646093615833,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_19",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.4967907203844864,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_07",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.5090556001079036,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_39",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.5230186445318534,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_16",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.5387479887809266,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_08",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.5508794061893252,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_11",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.5537083742373,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_09",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.5668587956340325,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_15",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.5788121674382998,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_12",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.5890702523441205,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_28",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.5947605486512104,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_40",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.6037750410185436,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_38",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.6078077445616359,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_32",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.623142121799814,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_37",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.6255240285032404,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_05",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.6313764032857743,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_13",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.6716874394490733,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_10",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.6980878562472963,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_06",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.715449251306362,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_17",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.7156925436293406,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_02",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.7182270694964352,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_36",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.7440171078815663,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_33",
+          "region": "Generic_Hills_A",
+          "d_mission": 1.7641635191478526,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_22",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.7974928569190887,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_04",
+          "region": "Generic_Hills_D",
+          "d_mission": 1.8141814780507557,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_31",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.8154538785782186,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_03",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.8402323735545387,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_35",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.8403507783786626,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_27",
+          "region": "Generic_Hills_C",
+          "d_mission": 1.8525526812942534,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "GEN_14",
+          "region": "Generic_Hills_B",
+          "d_mission": 1.858589964725778,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "RANK_NEG_FLAT_4",
+          "region": "Alluvial_Plains",
+          "d_mission": 1.9858585858585858,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "RANK_NEG_FLAT_3",
+          "region": "Alluvial_Plains",
+          "d_mission": 2.0006734006734006,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "RANK_NEG_FLAT_2",
+          "region": "Alluvial_Plains",
+          "d_mission": 2.0154882154882157,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "RANK_NEG_FLAT_1",
+          "region": "Alluvial_Plains",
+          "d_mission": 2.0303030303030303,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        },
+        {
+          "cell_id": "OUTLIER_ARTIFACT_1",
+          "region": "Isolated_Spire",
+          "d_mission": 2.790338164251208,
+          "pareto_front_rank": 0,
+          "within_epsilon": false,
+          "mode_metric": null
+        }
+      ]
+    },
+    {
+      "mode": "RareCombination",
+      "status": "Ranked",
+      "eligibility_rule": "d_mission <= epsilon AND rarity status SupportedRareCombination (outliers excluded).",
+      "objective_names": [
+        "-d_mission",
+        "earth_rarity_knn"
+      ],
+      "entries": [
+        {
+          "cell_id": "PUNA_3",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7531986531986533,
+          "pareto_front_rank": 1,
+          "within_epsilon": true,
+          "mode_metric": 0.2624380704041721
+        },
+        {
+          "cell_id": "PUNA_2",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7535353535353536,
+          "pareto_front_rank": 1,
+          "within_epsilon": true,
+          "mode_metric": 0.2648826597131682
+        },
+        {
+          "cell_id": "PUNA_1",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7538720538720538,
+          "pareto_front_rank": 1,
+          "within_epsilon": true,
+          "mode_metric": 0.2673272490221643
+        },
+        {
+          "cell_id": "DEVON_3",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.821043771043771,
+          "pareto_front_rank": 2,
+          "within_epsilon": true,
+          "mode_metric": 0.24526543465682332
+        },
+        {
+          "cell_id": "DEVON_2",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.8510101010101011,
+          "pareto_front_rank": 3,
+          "within_epsilon": true,
+          "mode_metric": 0.23641058893757083
+        },
+        {
+          "cell_id": "DEVON_1",
+          "region": "Devon_Island_Arctic",
+          "d_mission": 0.8809764309764311,
+          "pareto_front_rank": 4,
+          "within_epsilon": true,
+          "mode_metric": 0.2341350672433835
+        }
+      ]
+    },
+    {
+      "mode": "UnderexploredRegion",
+      "status": "Ranked",
+      "eligibility_rule": "d_mission <= epsilon AND outside every catalogued analog cluster; Pareto of (-d_mission, km from catalog).",
+      "objective_names": [
+        "-d_mission",
+        "geographic_distance_km"
+      ],
+      "entries": [
+        {
+          "cell_id": "PUNA_3",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7531986531986533,
+          "pareto_front_rank": 1,
+          "within_epsilon": true,
+          "mode_metric": 10794.811184514458
+        },
+        {
+          "cell_id": "PUNA_2",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7535353535353536,
+          "pareto_front_rank": 2,
+          "within_epsilon": true,
+          "mode_metric": 10784.076725505194
+        },
+        {
+          "cell_id": "PUNA_1",
+          "region": "Puna_Plateau",
+          "d_mission": 0.7538720538720538,
+          "pareto_front_rank": 3,
+          "within_epsilon": true,
+          "mode_metric": 10773.36166938563
+        }
+      ]
+    }
+  ],
+  "dossiers": [
+    {
+      "cell_id": "KAM_POS_2",
+      "region": "Kamchatka_Volcanic",
+      "lat": 55.95,
+      "lon": 160.45000000000002,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.96,
+        "vertical_uncertainty_m": 0.45,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          1
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "KAM_POS_2",
+        "mission_distance": 0.015824915824915964,
+        "mission_distance_sigma": 0.09177265363320324,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_SHADOW_1DEG",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.45,
+            "z": 0.01111111111111127,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.35000000000000003,
+            "z": 2.220446049250313e-16,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.612,
+            "z": 0.036363636363636404,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.037966644936983915,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.02565026075619295,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9168
+      },
+      "aet": {
+        "cell_id": "KAM_POS_2",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_TRACTION"
+        ],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": "SYNTH_GRAVITY_SLIP_CORRECTION",
+            "residual_relative_uncertainty": 0.15,
+            "status": "TransferableWithCorrection",
+            "limitation_note": "Correction model 'SYNTH_GRAVITY_SLIP_CORRECTION' valid at this site (residual 15%).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 55.95
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 56.0°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.016 ± 0.092 (3 of 3 requirements within acceptable range); Mission Match front 1."
+    },
+    {
+      "cell_id": "ICE_POS_3",
+      "region": "Iceland_Highlands",
+      "lat": 65.1,
+      "lon": -17.1,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.94,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": false
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          2
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "ICE_POS_3",
+        "mission_distance": 0.03407407407407407,
+        "mission_distance_sigma": null,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.4,
+            "z": 0.022222222222222143,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.37,
+            "z": 0.08000000000000007,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.62,
+            "z": 0.0,
+            "tolerance": 0.22999999999999998,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.03118698392003477,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.02193176879617558,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.8929999999999999
+      },
+      "aet": {
+        "cell_id": "ICE_POS_3",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 65.1
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 65.1°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.034 (σ unknown) (3 of 3 requirements within acceptable range); Mission Match front 2."
+    },
+    {
+      "cell_id": "KAM_POS_3",
+      "region": "Kamchatka_Volcanic",
+      "lat": 56.099999999999994,
+      "lon": 160.60000000000002,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.96,
+        "vertical_uncertainty_m": 0.45,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          3
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "KAM_POS_3",
+        "mission_distance": 0.04727858293075682,
+        "mission_distance_sigma": 0.09081004030746002,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.7,
+            "z": 0.04444444444444429,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.37,
+            "z": 0.08000000000000007,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.624,
+            "z": 0.017391304347826105,
+            "tolerance": 0.22999999999999998,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.02411940460669276,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.014864189482833572,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9168
+      },
+      "aet": {
+        "cell_id": "KAM_POS_3",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_TRACTION"
+        ],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": "SYNTH_GRAVITY_SLIP_CORRECTION",
+            "residual_relative_uncertainty": 0.15,
+            "status": "TransferableWithCorrection",
+            "limitation_note": "Correction model 'SYNTH_GRAVITY_SLIP_CORRECTION' valid at this site (residual 15%).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 56.099999999999994
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 56.1°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.047 ± 0.091 (3 of 3 requirements within acceptable range); Mission Match front 2."
+    },
+    {
+      "cell_id": "ICE_POS_2",
+      "region": "Iceland_Highlands",
+      "lat": 64.95,
+      "lon": -16.95,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.94,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": false
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          4
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "ICE_POS_2",
+        "mission_distance": 0.05597423510466987,
+        "mission_distance_sigma": null,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.7,
+            "z": 0.04444444444444429,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.37,
+            "z": 0.08000000000000007,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.63,
+            "z": 0.04347826086956526,
+            "tolerance": 0.22999999999999998,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.027509235115167303,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.011474358974358992,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.8929999999999999
+      },
+      "aet": {
+        "cell_id": "ICE_POS_2",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 64.95
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 65.0°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.056 (σ unknown) (3 of 3 requirements within acceptable range); Mission Match front 3."
+    },
+    {
+      "cell_id": "KAM_POS_1",
+      "region": "Kamchatka_Volcanic",
+      "lat": 55.8,
+      "lon": 160.3,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.96,
+        "vertical_uncertainty_m": 0.45,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          5
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "KAM_POS_1",
+        "mission_distance": 0.08585858585858587,
+        "mission_distance_sigma": 0.10011103812707112,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.2,
+            "z": 0.06666666666666682,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.33,
+            "z": 0.09999999999999983,
+            "tolerance": 0.19999999999999998,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.6,
+            "z": 0.090909090909091,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.06208604954367669,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.021171229900043463,
+        "nearest_catalog_site_id": "CAT_TOLBACHIK",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9168
+      },
+      "aet": {
+        "cell_id": "KAM_POS_1",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_TRACTION"
+        ],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": "SYNTH_GRAVITY_SLIP_CORRECTION",
+            "residual_relative_uncertainty": 0.15,
+            "status": "TransferableWithCorrection",
+            "limitation_note": "Correction model 'SYNTH_GRAVITY_SLIP_CORRECTION' valid at this site (residual 15%).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 55.8
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 55.8°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.086 ± 0.100 (3 of 3 requirements within acceptable range); Mission Match front 3."
+    },
+    {
+      "cell_id": "ICE_POS_1",
+      "region": "Iceland_Highlands",
+      "lat": 64.8,
+      "lon": -16.8,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.94,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": false
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          6
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "ICE_POS_1",
+        "mission_distance": 0.09268921095008058,
+        "mission_distance_sigma": null,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_SLOPE_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 12.0,
+            "z": 0.1111111111111111,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.37,
+            "z": 0.08000000000000007,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.64,
+            "z": 0.08695652173913052,
+            "tolerance": 0.22999999999999998,
+            "within_range": true,
+            "sigma_value": null,
+            "uncertainty_ok": null,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.037966644936983915,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.012316384180790972,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.8929999999999999
+      },
+      "aet": {
+        "cell_id": "ICE_POS_1",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 64.8
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 64.8°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.093 (σ unknown) (3 of 3 requirements within acceptable range); Mission Match front 4."
+    },
+    {
+      "cell_id": "KAM_POS_4",
+      "region": "Kamchatka_Volcanic",
+      "lat": 56.25,
+      "lon": 160.75,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.96,
+        "vertical_uncertainty_m": 0.45,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          7
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "KAM_POS_4",
+        "mission_distance": 0.10985507246376813,
+        "mission_distance_sigma": 0.09081004030746002,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 11.95,
+            "z": 0.09999999999999984,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.39,
+            "z": 0.16000000000000014,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.636,
+            "z": 0.06956521739130442,
+            "tolerance": 0.22999999999999998,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.04823880921338549,
+        "effective_k": 5,
+        "support_within_rarity_radius": 6,
+        "rarity_status": "CommonTerrestrialTerrain",
+        "catalog_novelty_distance": 0.02419111255975666,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9168
+      },
+      "aet": {
+        "cell_id": "KAM_POS_4",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_TRACTION"
+        ],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": "SYNTH_GRAVITY_SLIP_CORRECTION",
+            "residual_relative_uncertainty": 0.15,
+            "status": "TransferableWithCorrection",
+            "limitation_note": "Correction model 'SYNTH_GRAVITY_SLIP_CORRECTION' valid at this site (residual 15%).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 56.25
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 56.2°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.110 ± 0.091 (3 of 3 requirements within acceptable range); Mission Match front 4."
+    },
+    {
+      "cell_id": "PUNA_3",
+      "region": "Puna_Plateau",
+      "lat": -24.5,
+      "lon": -67.3,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          8
+        ],
+        [
+          "RareCombination",
+          1
+        ],
+        [
+          "UnderexploredRegion",
+          1
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "PUNA_3",
+        "mission_distance": 0.7531986531986533,
+        "mission_distance_sigma": 0.09177265363320324,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 15.0,
+            "z": 0.7777777777777778,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.55,
+            "z": 0.8000000000000003,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.47,
+            "z": 0.681818181818182,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.2624380704041721,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.2651390699695785,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 10794.811184514458,
+        "heuristic_quality_score": 0.9025
+      },
+      "aet": {
+        "cell_id": "PUNA_3",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 24.5
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 24.5°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.753 ± 0.092 (3 of 3 requirements within acceptable range); Mission Match front 5."
+    },
+    {
+      "cell_id": "DEVON_3",
+      "region": "Devon_Island_Arctic",
+      "lat": 75.53999999999999,
+      "lon": -90.0,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.4,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          9
+        ],
+        [
+          "RareCombination",
+          4
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "DEVON_3",
+        "mission_distance": 0.821043771043771,
+        "mission_distance_sigma": 0.10011103812707112,
+        "weighted_requirement_coverage": 0.3333333333333333,
+        "limiting_requirements": [
+          "REQ_SLOPE_1X",
+          "REQ_ROUGH_1X"
+        ],
+        "bottleneck_requirement": "REQ_SLOPE_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 6.0,
+            "z": 1.2222222222222223,
+            "tolerance": 4.5,
+            "within_range": false,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.12,
+            "z": 1.15,
+            "tolerance": 0.19999999999999998,
+            "within_range": false,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.6,
+            "z": 0.090909090909091,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.24526543465682332,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.02824858757062143,
+        "nearest_catalog_site_id": "CAT_HAUGHTON",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9119999999999999
+      },
+      "aet": {
+        "cell_id": "DEVON_3",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_LOWSUN_NAV"
+        ],
+        "not_transferable_requirements": [
+          "TR_TRACTION",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Required observable conditions are outside the acceptable range at this site.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Transferable",
+            "limitation_note": "Mechanism evidenced (Literature: SYNTHETIC PLACEHOLDER - replace with a real reference).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": [
+          "REQ_SLOPE_1X = 6.000 deg outside acceptable range [Some(7.0), Some(16.0)]",
+          "REQ_ROUGH_1X = 0.120 m outside acceptable range [Some(0.15), Some(0.6)]"
+        ]
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.821 ± 0.100 (1 of 3 requirements within acceptable range; limiting: REQ_SLOPE_1X, REQ_ROUGH_1X); Mission Match front 5."
+    },
+    {
+      "cell_id": "PUNA_2",
+      "region": "Puna_Plateau",
+      "lat": -24.35,
+      "lon": -67.44999999999999,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "MissionMatch",
+          10
+        ],
+        [
+          "RareCombination",
+          2
+        ],
+        [
+          "UnderexploredRegion",
+          2
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "PUNA_2",
+        "mission_distance": 0.7535353535353536,
+        "mission_distance_sigma": 0.09177265363320324,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 14.8,
+            "z": 0.7333333333333335,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.55,
+            "z": 0.8000000000000003,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.46,
+            "z": 0.7272727272727273,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.2648826597131682,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.2675836592785746,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 10784.076725505194,
+        "heuristic_quality_score": 0.9025
+      },
+      "aet": {
+        "cell_id": "PUNA_2",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 24.35
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 24.4°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.754 ± 0.092 (3 of 3 requirements within acceptable range); Mission Match front 6."
+    },
+    {
+      "cell_id": "PUNA_1",
+      "region": "Puna_Plateau",
+      "lat": -24.2,
+      "lon": -67.6,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.5,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "RareCombination",
+          3
+        ],
+        [
+          "UnderexploredRegion",
+          3
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "PUNA_1",
+        "mission_distance": 0.7538720538720538,
+        "mission_distance_sigma": 0.09177265363320324,
+        "weighted_requirement_coverage": 1.0,
+        "limiting_requirements": [],
+        "bottleneck_requirement": "REQ_ROUGH_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 14.6,
+            "z": 0.6888888888888888,
+            "tolerance": 4.5,
+            "within_range": true,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.55,
+            "z": 0.8000000000000003,
+            "tolerance": 0.25,
+            "within_range": true,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.45,
+            "z": 0.7727272727272727,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.2673272490221643,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.2700282485875707,
+        "nearest_catalog_site_id": "CAT_ICELAND",
+        "geographic_distance_km": 10773.36166938563,
+        "heuristic_quality_score": 0.9025
+      },
+      "aet": {
+        "cell_id": "PUNA_1",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "Unknown",
+        "transferable_requirements": [],
+        "not_transferable_requirements": [
+          "TR_LOWSUN_NAV",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [
+          "TR_TRACTION"
+        ],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Unknown",
+            "limitation_note": "No mechanism evidence for this site; status defaults to Unknown.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": {
+              "OutsideFieldLatitudeBand": {
+                "required_min_abs_lat": 66.0,
+                "site_abs_lat": 24.2
+              }
+            },
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Field condition for 'sustained_low_sun_illumination' requires |lat| >= 66.0°, site is at 24.2°.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": true,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": []
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.754 ± 0.092 (3 of 3 requirements within acceptable range); Mission Match front 7."
+    },
+    {
+      "cell_id": "DEVON_2",
+      "region": "Devon_Island_Arctic",
+      "lat": 75.42,
+      "lon": -89.60000000000001,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.4,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "RareCombination",
+          5
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "DEVON_2",
+        "mission_distance": 0.8510101010101011,
+        "mission_distance_sigma": 0.10011103812707112,
+        "weighted_requirement_coverage": 0.3333333333333333,
+        "limiting_requirements": [
+          "REQ_SLOPE_1X",
+          "REQ_ROUGH_1X"
+        ],
+        "bottleneck_requirement": "REQ_SLOPE_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 5.8,
+            "z": 1.2666666666666666,
+            "tolerance": 4.5,
+            "within_range": false,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.12,
+            "z": 1.15,
+            "tolerance": 0.19999999999999998,
+            "within_range": false,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.59,
+            "z": 0.1363636363636365,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.23641058893757083,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.02580399826162534,
+        "nearest_catalog_site_id": "CAT_HAUGHTON",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9119999999999999
+      },
+      "aet": {
+        "cell_id": "DEVON_2",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_LOWSUN_NAV"
+        ],
+        "not_transferable_requirements": [
+          "TR_TRACTION",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Required observable conditions are outside the acceptable range at this site.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Transferable",
+            "limitation_note": "Mechanism evidenced (Literature: SYNTHETIC PLACEHOLDER - replace with a real reference).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": [
+          "REQ_SLOPE_1X = 5.800 deg outside acceptable range [Some(7.0), Some(16.0)]",
+          "REQ_ROUGH_1X = 0.120 m outside acceptable range [Some(0.15), Some(0.6)]"
+        ]
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.851 ± 0.100 (1 of 3 requirements within acceptable range; limiting: REQ_SLOPE_1X, REQ_ROUGH_1X); Mission Match front 6."
+    },
+    {
+      "cell_id": "DEVON_1",
+      "region": "Devon_Island_Arctic",
+      "lat": 75.3,
+      "lon": -89.2,
+      "data_origin": "Synthetic",
+      "provenance": {
+        "source_id": "SYNTHETIC_GENERATOR",
+        "source_version": "star-synth-4.1",
+        "processing_version": "none",
+        "observation_window_utc": null
+      },
+      "data_quality": {
+        "valid_pixel_ratio": 0.95,
+        "vertical_uncertainty_m": 0.4,
+        "resolution_m": 2.0,
+        "active_feature_uncertainty_known": true
+      },
+      "within_soft_epsilon": true,
+      "appears_in_modes": [
+        [
+          "RareCombination",
+          6
+        ]
+      ],
+      "observable_match": {
+        "cell_id": "DEVON_1",
+        "mission_distance": 0.8809764309764311,
+        "mission_distance_sigma": 0.10011103812707112,
+        "weighted_requirement_coverage": 0.3333333333333333,
+        "limiting_requirements": [
+          "REQ_SLOPE_1X",
+          "REQ_ROUGH_1X"
+        ],
+        "bottleneck_requirement": "REQ_SLOPE_1X",
+        "breakdown": [
+          {
+            "requirement_id": "REQ_SLOPE_1X",
+            "feature": "RmsSlope1x",
+            "unit": "deg",
+            "target_value": 11.5,
+            "acceptable_min": 7.0,
+            "acceptable_max": 16.0,
+            "observed_value": 5.6,
+            "z": 1.3111111111111111,
+            "tolerance": 4.5,
+            "within_range": false,
+            "sigma_value": 0.8,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_ROUGH_1X",
+            "feature": "Roughness1x",
+            "unit": "m",
+            "target_value": 0.35,
+            "acceptable_min": 0.15,
+            "acceptable_max": 0.6,
+            "observed_value": 0.12,
+            "z": 1.15,
+            "tolerance": 0.19999999999999998,
+            "within_range": false,
+            "sigma_value": 0.04,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          },
+          {
+            "requirement_id": "REQ_SHADOW_1DEG",
+            "feature": "ShadowObstruction1Deg",
+            "unit": "ratio",
+            "target_value": 0.62,
+            "acceptable_min": 0.4,
+            "acceptable_max": 0.85,
+            "observed_value": 0.58,
+            "z": 0.181818181818182,
+            "tolerance": 0.21999999999999997,
+            "within_range": true,
+            "sigma_value": 0.03,
+            "uncertainty_ok": true,
+            "effective_weight": 0.3333333333333333
+          }
+        ]
+      },
+      "novelty": {
+        "earth_rarity_knn_distance": 0.2341350672433835,
+        "effective_k": 5,
+        "support_within_rarity_radius": 2,
+        "rarity_status": "SupportedRareCombination",
+        "catalog_novelty_distance": 0.023359408952629248,
+        "nearest_catalog_site_id": "CAT_HAUGHTON",
+        "geographic_distance_km": 0.0,
+        "heuristic_quality_score": 0.9119999999999999
+      },
+      "aet": {
+        "cell_id": "DEVON_1",
+        "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+        "overall_status": "PartialTransfer",
+        "transferable_requirements": [
+          "TR_LOWSUN_NAV"
+        ],
+        "not_transferable_requirements": [
+          "TR_TRACTION",
+          "TR_VACUUM_OPTICS",
+          "TR_GRAVITY_SINKAGE"
+        ],
+        "unknown_requirements": [],
+        "findings": [
+          {
+            "requirement_id": "TR_TRACTION",
+            "engineering_decision": "Wheel slip threshold calibration",
+            "mechanism_id": "granular_regolith_shear",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "Required observable conditions are outside the acceptable range at this site.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_LOWSUN_NAV",
+            "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+            "mechanism_id": "sustained_low_sun_illumination",
+            "venue_check": "ReproducibleAtFieldSite",
+            "observable_match_satisfied": true,
+            "evidence_level": "Literature",
+            "evidence_applicability": "Applicable",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "Transferable",
+            "limitation_note": "Mechanism evidenced (Literature: SYNTHETIC PLACEHOLDER - replace with a real reference).",
+            "relies_on_synthetic_placeholder": true
+          },
+          {
+            "requirement_id": "TR_VACUUM_OPTICS",
+            "engineering_decision": "Optics and dust behaviour in vacuum",
+            "mechanism_id": "high_vacuum_radiative_transfer",
+            "venue_check": "LaboratoryOnly",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'high_vacuum_radiative_transfer' is reproducible only in a laboratory; no field site can provide it.",
+            "relies_on_synthetic_placeholder": false
+          },
+          {
+            "requirement_id": "TR_GRAVITY_SINKAGE",
+            "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+            "mechanism_id": "sustained_lunar_gravity",
+            "venue_check": "IrreducibleOnEarth",
+            "observable_match_satisfied": false,
+            "evidence_level": "None",
+            "evidence_applicability": "NoEvidence",
+            "applied_correction_model": null,
+            "residual_relative_uncertainty": null,
+            "status": "NotTransferable",
+            "limitation_note": "'sustained_lunar_gravity' cannot be reproduced on Earth in a sustained way: irreducible gap of any terrestrial campaign.",
+            "relies_on_synthetic_placeholder": false
+          }
+        ],
+        "transfer_limits": [
+          "REQ_SLOPE_1X = 5.600 deg outside acceptable range [Some(7.0), Some(16.0)]",
+          "REQ_ROUGH_1X = 0.120 m outside acceptable range [Some(0.15), Some(0.6)]"
+        ]
+      },
+      "constraint_margin_warnings": [],
+      "ranking_explanation": "d_mission = 0.881 ± 0.100 (1 of 3 requirements within acceptable range; limiting: REQ_SLOPE_1X, REQ_ROUGH_1X); Mission Match front 7."
+    }
+  ],
+  "campaign_assets": [
+    {
+      "asset_id": "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+      "kind": {
+        "FieldAnalogSite": {
+          "cell_id": "KAM_POS_2",
+          "region": "Kamchatka_Volcanic"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "REQ_SLOPE_1X",
+          "status": "Provisional",
+          "basis": "RmsSlope1x = 11.450 deg within [7, 16]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ROUGH_1X",
+          "status": "Provisional",
+          "basis": "Roughness1x = 0.350 m within [0.15, 0.6]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_SHADOW_1DEG",
+          "status": "Provisional",
+          "basis": "ShadowObstruction1Deg = 0.612 ratio within [0.4, 0.85]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+          ]
+        },
+        {
+          "requirement_id": "TR_TRACTION",
+          "status": "Provisional",
+          "basis": "Field test possible; AET TransferableWithCorrection [SYNTHETIC placeholder evidence]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'granular_regolith_shear' at KAM_POS_2)"
+          ]
+        }
+      ],
+      "estimated_cost_units": null,
+      "duration_days": null,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "FIELD:Iceland_Highlands:ICE_POS_3",
+      "kind": {
+        "FieldAnalogSite": {
+          "cell_id": "ICE_POS_3",
+          "region": "Iceland_Highlands"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "REQ_SLOPE_1X",
+          "status": "Provisional",
+          "basis": "RmsSlope1x = 11.400 deg within [7, 16]",
+          "missing_for_confirmation": [
+            "Measure the uncertainty of RmsSlope1x at ICE_POS_3",
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of ICE_POS_3)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ROUGH_1X",
+          "status": "Provisional",
+          "basis": "Roughness1x = 0.370 m within [0.15, 0.6]",
+          "missing_for_confirmation": [
+            "Measure the uncertainty of Roughness1x at ICE_POS_3",
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of ICE_POS_3)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_SHADOW_1DEG",
+          "status": "Provisional",
+          "basis": "ShadowObstruction1Deg = 0.620 ratio within [0.4, 0.85]",
+          "missing_for_confirmation": [
+            "Measure the uncertainty of ShadowObstruction1Deg at ICE_POS_3",
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of ICE_POS_3)"
+          ]
+        },
+        {
+          "requirement_id": "TR_TRACTION",
+          "status": "Provisional",
+          "basis": "Field test possible; AET Unknown",
+          "missing_for_confirmation": [
+            "No mechanism evidence for this site; status defaults to Unknown.",
+            "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'granular_regolith_shear' at ICE_POS_3)"
+          ]
+        }
+      ],
+      "estimated_cost_units": null,
+      "duration_days": null,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "FIELD:Puna_Plateau:PUNA_3",
+      "kind": {
+        "FieldAnalogSite": {
+          "cell_id": "PUNA_3",
+          "region": "Puna_Plateau"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "REQ_SLOPE_1X",
+          "status": "Provisional",
+          "basis": "RmsSlope1x = 15.000 deg within [7, 16]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of PUNA_3)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ROUGH_1X",
+          "status": "Provisional",
+          "basis": "Roughness1x = 0.550 m within [0.15, 0.6]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of PUNA_3)"
+          ]
+        },
+        {
+          "requirement_id": "REQ_SHADOW_1DEG",
+          "status": "Provisional",
+          "basis": "ShadowObstruction1Deg = 0.470 ratio within [0.4, 0.85]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of PUNA_3)"
+          ]
+        },
+        {
+          "requirement_id": "TR_TRACTION",
+          "status": "Provisional",
+          "basis": "Field test possible; AET Unknown",
+          "missing_for_confirmation": [
+            "No mechanism evidence for this site; status defaults to Unknown.",
+            "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'granular_regolith_shear' at PUNA_3)"
+          ]
+        }
+      ],
+      "estimated_cost_units": null,
+      "duration_days": null,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "FIELD:Devon_Island_Arctic:DEVON_3",
+      "kind": {
+        "FieldAnalogSite": {
+          "cell_id": "DEVON_3",
+          "region": "Devon_Island_Arctic"
+        }
+      },
+      "time_window": {
+        "window_id": "DEVON_SPRING_2027",
+        "start_utc": "2027-03-05T00:00:00Z",
+        "end_utc": "2027-04-05T00:00:00Z",
+        "season_or_solar_regime": "Sun elevation below ~3° for several hours (SYNTHETIC window)",
+        "illumination_geometry_valid": true
+      },
+      "coverage": [
+        {
+          "requirement_id": "REQ_SHADOW_1DEG",
+          "status": "Provisional",
+          "basis": "ShadowObstruction1Deg = 0.600 ratio within [0.4, 0.85]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of DEVON_3)"
+          ]
+        },
+        {
+          "requirement_id": "TR_LOWSUN_NAV",
+          "status": "Provisional",
+          "basis": "Field test possible; AET Transferable [SYNTHETIC placeholder evidence]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+          ]
+        }
+      ],
+      "estimated_cost_units": null,
+      "duration_days": null,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "LAB:TVAC_DUSTY_OPTICS",
+      "kind": {
+        "LaboratoryFacility": {
+          "facility_id": "TVAC_DUSTY_OPTICS"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "TR_VACUUM_OPTICS",
+          "status": "Provisional",
+          "basis": "Laboratory reproduces 'high_vacuum_radiative_transfer' [SYNTHETIC placeholder]",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (capability/transfer evidence of TVAC_DUSTY_OPTICS)"
+          ]
+        }
+      ],
+      "estimated_cost_units": 25.0,
+      "duration_days": 5.0,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "LAB:SOILBIN_TILTBED",
+      "kind": {
+        "LaboratoryFacility": {
+          "facility_id": "SOILBIN_TILTBED"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "REQ_SLOPE_1X",
+          "status": "Provisional",
+          "basis": "Controlled condition: facility sets RmsSlope1x",
+          "missing_for_confirmation": [
+            "Replace synthetic placeholder with independently verifiable data/evidence (capability of SOILBIN_TILTBED)"
+          ]
+        },
+        {
+          "requirement_id": "TR_TRACTION",
+          "status": "Provisional",
+          "basis": "Laboratory reproduces 'granular_regolith_shear' [SYNTHETIC placeholder]",
+          "missing_for_confirmation": [
+            "Validated correction model for 'granular_regolith_shear' in laboratory conditions",
+            "Replace synthetic placeholder with independently verifiable data/evidence (capability/transfer evidence of SOILBIN_TILTBED)"
+          ]
+        }
+      ],
+      "estimated_cost_units": 20.0,
+      "duration_days": 7.0,
+      "synthetic_placeholder": true
+    },
+    {
+      "asset_id": "LAB:LOWSUN_LIGHT_RIG",
+      "kind": {
+        "LaboratoryFacility": {
+          "facility_id": "LOWSUN_LIGHT_RIG"
+        }
+      },
+      "time_window": null,
+      "coverage": [
+        {
+          "requirement_id": "TR_LOWSUN_NAV",
+          "status": "Provisional",
+          "basis": "Laboratory reproduces 'sustained_low_sun_illumination' [SYNTHETIC placeholder]",
+          "missing_for_confirmation": [
+            "Evidence that 'sustained_low_sun_illumination' results from LOWSUN_LIGHT_RIG transfer to the target",
+            "Replace synthetic placeholder with independently verifiable data/evidence (capability/transfer evidence of LOWSUN_LIGHT_RIG)"
+          ]
+        }
+      ],
+      "estimated_cost_units": 10.0,
+      "duration_days": 3.0,
+      "synthetic_placeholder": true
+    }
+  ],
+  "campaign_portfolio": {
+    "status": "AllReducibleTestableSomeProvisional",
+    "algorithm": "greedy constrained portfolio heuristic; lexicographic objective (critical confirmed > critical provisional > confirmed > provisional) per unit cost; tie-break: fewer open items, then asset_id; exact enumeration check for small asset sets",
+    "cost_model": "UnknownCostsMinimisingAssetCount",
+    "selected_assets": [
+      "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+      "FIELD:Devon_Island_Arctic:DEVON_3",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "selection_steps": [
+      {
+        "asset_id": "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+        "newly_confirmed": [],
+        "newly_provisional": [
+          "REQ_ROUGH_1X",
+          "REQ_SHADOW_1DEG",
+          "REQ_SLOPE_1X",
+          "TR_TRACTION"
+        ],
+        "upgraded_to_confirmed": [],
+        "cost_units": null
+      },
+      {
+        "asset_id": "FIELD:Devon_Island_Arctic:DEVON_3",
+        "newly_confirmed": [],
+        "newly_provisional": [
+          "TR_LOWSUN_NAV"
+        ],
+        "upgraded_to_confirmed": [],
+        "cost_units": null
+      },
+      {
+        "asset_id": "LAB:TVAC_DUSTY_OPTICS",
+        "newly_confirmed": [],
+        "newly_provisional": [
+          "TR_VACUUM_OPTICS"
+        ],
+        "upgraded_to_confirmed": [],
+        "cost_units": 25.0
+      }
+    ],
+    "confirmed_requirements": [],
+    "provisional_requirements": [
+      "REQ_ROUGH_1X",
+      "REQ_SHADOW_1DEG",
+      "REQ_SLOPE_1X",
+      "TR_LOWSUN_NAV",
+      "TR_TRACTION",
+      "TR_VACUUM_OPTICS"
+    ],
+    "uncovered_requirements": [],
+    "no_capable_asset_requirements": [],
+    "irreducible_requirements": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "critical_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV",
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 1.0,
+    "objective": {
+      "critical_confirmed": 0.0,
+      "critical_provisional": 2.0,
+      "confirmed": 0.0,
+      "provisional": 6.0
+    },
+    "total_cost_units": null,
+    "total_duration_days": null,
+    "budget_check": "NotConstrained",
+    "duration_check": "NotConstrained",
+    "single_best_site_baseline": {
+      "asset_id": "FIELD:Iceland_Highlands:ICE_POS_3",
+      "confirmed_coverage": 0.0,
+      "testable_coverage": 0.6666666666666666
+    },
+    "alternatives": [
+      {
+        "without_asset": "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+        "selected_assets": [
+          "FIELD:Puna_Plateau:PUNA_3",
+          "FIELD:Devon_Island_Arctic:DEVON_3",
+          "LAB:TVAC_DUSTY_OPTICS"
+        ],
+        "confirmed_coverage": 0.0,
+        "testable_coverage": 1.0,
+        "critical_confirmations_lost": []
+      },
+      {
+        "without_asset": "FIELD:Devon_Island_Arctic:DEVON_3",
+        "selected_assets": [
+          "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+          "LAB:LOWSUN_LIGHT_RIG",
+          "LAB:TVAC_DUSTY_OPTICS"
+        ],
+        "confirmed_coverage": 0.0,
+        "testable_coverage": 1.0,
+        "critical_confirmations_lost": []
+      },
+      {
+        "without_asset": "LAB:TVAC_DUSTY_OPTICS",
+        "selected_assets": [
+          "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+          "FIELD:Devon_Island_Arctic:DEVON_3"
+        ],
+        "confirmed_coverage": 0.0,
+        "testable_coverage": 0.8333333333333334,
+        "critical_confirmations_lost": []
+      }
+    ],
+    "exact_check": {
+      "assets_considered": 7,
+      "best_selected_assets": [
+        "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+        "FIELD:Devon_Island_Arctic:DEVON_3",
+        "LAB:TVAC_DUSTY_OPTICS"
+      ],
+      "best_objective": {
+        "critical_confirmed": 0.0,
+        "critical_provisional": 2.0,
+        "confirmed": 0.0,
+        "provisional": 6.0
+      },
+      "greedy_objective": {
+        "critical_confirmed": 0.0,
+        "critical_provisional": 2.0,
+        "confirmed": 0.0,
+        "provisional": 6.0
+      },
+      "greedy_is_optimal": true
+    }
+  },
+  "residual_risk_register": [
+    {
+      "requirement_id": "REQ_SLOPE_1X",
+      "is_transfer_requirement": false,
+      "engineering_decision": "RmsSlope1x within [7, 16] deg",
+      "criticality": "High",
+      "mechanism_id": null,
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "FIELD:Kamchatka_Volcanic:KAM_POS_2"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+      ]
+    },
+    {
+      "requirement_id": "REQ_ROUGH_1X",
+      "is_transfer_requirement": false,
+      "engineering_decision": "Roughness1x within [0.15, 0.6] m",
+      "criticality": "Normal",
+      "mechanism_id": null,
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "FIELD:Kamchatka_Volcanic:KAM_POS_2"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+      ]
+    },
+    {
+      "requirement_id": "REQ_SHADOW_1DEG",
+      "is_transfer_requirement": false,
+      "engineering_decision": "ShadowObstruction1Deg within [0.4, 0.85] ratio",
+      "criticality": "High",
+      "mechanism_id": null,
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+        "FIELD:Devon_Island_Arctic:DEVON_3"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of DEVON_3)",
+        "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+      ]
+    },
+    {
+      "requirement_id": "TR_TRACTION",
+      "is_transfer_requirement": true,
+      "engineering_decision": "Wheel slip threshold calibration",
+      "criticality": "MissionCritical",
+      "mechanism_id": "granular_regolith_shear",
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "FIELD:Kamchatka_Volcanic:KAM_POS_2"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'granular_regolith_shear' at KAM_POS_2)"
+      ]
+    },
+    {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "is_transfer_requirement": true,
+      "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+      "criticality": "MissionCritical",
+      "mechanism_id": "sustained_low_sun_illumination",
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "FIELD:Devon_Island_Arctic:DEVON_3"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+      ]
+    },
+    {
+      "requirement_id": "TR_VACUUM_OPTICS",
+      "is_transfer_requirement": true,
+      "engineering_decision": "Optics and dust behaviour in vacuum",
+      "criticality": "High",
+      "mechanism_id": "high_vacuum_radiative_transfer",
+      "status": "ProvisionalBeforeFlight",
+      "rehearsed_by": [
+        "LAB:TVAC_DUSTY_OPTICS"
+      ],
+      "missing_for_confirmation": [
+        "Replace synthetic placeholder with independently verifiable data/evidence (capability/transfer evidence of TVAC_DUSTY_OPTICS)"
+      ]
+    },
+    {
+      "requirement_id": "TR_GRAVITY_SINKAGE",
+      "is_transfer_requirement": true,
+      "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+      "criticality": "MissionCritical",
+      "mechanism_id": "sustained_lunar_gravity",
+      "status": "IrreducibleUntilFlight",
+      "rehearsed_by": [],
+      "missing_for_confirmation": []
+    }
+  ],
+  "campaign_next_actions": [
+    {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+    },
+    {
+      "requirement_id": "TR_TRACTION",
+      "criticality": "MissionCritical",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'granular_regolith_shear' at KAM_POS_2)"
+    },
+    {
+      "requirement_id": "TR_GRAVITY_SINKAGE",
+      "criticality": "MissionCritical",
+      "action": "Cannot be rehearsed on Earth: carry as flight risk (design margin or in-situ verification)."
+    },
+    {
+      "requirement_id": "REQ_SHADOW_1DEG",
+      "criticality": "High",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of DEVON_3)"
+    },
+    {
+      "requirement_id": "REQ_SHADOW_1DEG",
+      "criticality": "High",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+    },
+    {
+      "requirement_id": "REQ_SLOPE_1X",
+      "criticality": "High",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+    },
+    {
+      "requirement_id": "TR_VACUUM_OPTICS",
+      "criticality": "High",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (capability/transfer evidence of TVAC_DUSTY_OPTICS)"
+    },
+    {
+      "requirement_id": "REQ_ROUGH_1X",
+      "criticality": "Normal",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (Earth features of KAM_POS_2)"
+    }
+  ],
+  "udd_recommendation": {
+    "decision_between": [
+      "KAM_POS_2",
+      "ICE_POS_3"
+    ],
+    "flip": {
+      "UncertaintyUnknown": {
+        "delta_d": 0.018249158249158105
+      }
+    },
+    "recommended_measurement": "REQ_ROUGH_1X",
+    "recommended_feature": "Roughness1x",
+    "expected_sigma_delta_after": null,
+    "measurement_can_resolve": null,
+    "independence_assumed": true,
+    "correlation_note": null,
+    "rationale": "#1 and #2 differ by Δd = 0.018; the uncertainty of REQ_ROUGH_1X is unknown, so whether this gap is real cannot be tested. Measure its uncertainty at both sites first.",
+    "expected_voi_score": null
+  },
+  "weight_sensitivity": {
+    "trials": 200,
+    "perturbation": "each requirement weight × 2^U(-1,1), independent per trial",
+    "lead_site_stability": 0.965,
+    "leaders": {
+      "Iceland_Highlands": 0.035,
+      "Kamchatka_Volcanic": 0.965
+    }
+  },
+  "decision": {
+    "lead_site": {
+      "UndecidedUncertaintyUnknown": {
+        "sites": [
+          "Kamchatka_Volcanic",
+          "Iceland_Highlands"
+        ]
+      }
+    },
+    "campaign_assets": [
+      "FIELD:Kamchatka_Volcanic:KAM_POS_2",
+      "FIELD:Devon_Island_Arctic:DEVON_3",
+      "LAB:TVAC_DUSTY_OPTICS"
+    ],
+    "confirmed_coverage": 0.0,
+    "testable_coverage": 1.0,
+    "mission_critical_unconfirmed": [
+      "TR_TRACTION",
+      "TR_LOWSUN_NAV",
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "irreducible_until_flight": [
+      "TR_GRAVITY_SINKAGE"
+    ],
+    "first_action": {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "criticality": "MissionCritical",
+      "action": "Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+    },
+    "statement": "Lead field site undecided between Kamchatka_Volcanic and Iceland_Highlands: a decisive uncertainty is unknown. Rehearsal campaign: FIELD:Kamchatka_Volcanic:KAM_POS_2 + FIELD:Devon_Island_Arctic:DEVON_3 + LAB:TVAC_DUSTY_OPTICS. Before flight 0% of reducible requirements are confirmed, 100% testable. Mission-critical not confirmed: TR_TRACTION, TR_LOWSUN_NAV, TR_GRAVITY_SINKAGE. First action: TR_LOWSUN_NAV — Replace synthetic placeholder with independently verifiable data/evidence (evidence for 'sustained_low_sun_illumination' at DEVON_3)"
+  },
+  "synthetic_content_warnings": [
+    "Run flagged as synthetic demo: results test the logic, not scientific accuracy.",
+    "61 of 61 Earth cells are synthetic.",
+    "Mechanism evidence / correction models include synthetic placeholders.",
+    "Laboratory capability catalog includes synthetic placeholders.",
+    "Strict policy: synthetic content never yields Confirmed coverage; it stays Provisional."
+  ]
+}

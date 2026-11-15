@@ -1,0 +1,78 @@
+[
+  {
+    "id": "LUNAR_SP_SHACKLETON_01",
+    "body": "Moon",
+    "region_name": "Shackleton_Connecting_Ridge",
+    "test_profile": "P3CombinedTerrainShadow",
+    "resolution_m": 2.0,
+    "vertical_uncertainty_m": 0.35,
+    "features": {
+      "rms_slope_1x": 11.5,
+      "rms_slope_3x": 9.775,
+      "rms_slope_9x": 7.4750000000000005,
+      "roughness_1x": 0.35,
+      "roughness_3x": 0.48999999999999994,
+      "roughness_9x": 0.77,
+      "shadow_obstruction_1deg": 0.62,
+      "shadow_obstruction_2deg": 0.434,
+      "shadow_obstruction_3deg": 0.279
+    }
+  },
+  {
+    "id": "SYNTH_MALAPERT",
+    "body": "Moon",
+    "region_name": "Malapert Massif (SYNTHETIC values)",
+    "test_profile": "P3CombinedTerrainShadow",
+    "resolution_m": 2.0,
+    "vertical_uncertainty_m": 0.35,
+    "features": {
+      "rms_slope_1x": 15.0,
+      "rms_slope_3x": 12.75,
+      "rms_slope_9x": 9.75,
+      "roughness_1x": 0.5,
+      "roughness_3x": 0.7,
+      "roughness_9x": 1.1,
+      "shadow_obstruction_1deg": 0.7,
+      "shadow_obstruction_2deg": 0.48999999999999994,
+      "shadow_obstruction_3deg": 0.315
+    }
+  },
+  {
+    "id": "SYNTH_DE_GERLACHE_RIM",
+    "body": "Moon",
+    "region_name": "de Gerlache Rim (SYNTHETIC values)",
+    "test_profile": "P3CombinedTerrainShadow",
+    "resolution_m": 2.0,
+    "vertical_uncertainty_m": 0.35,
+    "features": {
+      "rms_slope_1x": 9.0,
+      "rms_slope_3x": 7.6499999999999995,
+      "rms_slope_9x": 5.8500000000000005,
+      "roughness_1x": 0.25,
+      "roughness_3x": 0.35,
+      "roughness_9x": 0.55,
+      "shadow_obstruction_1deg": 0.5,
+      "shadow_obstruction_2deg": 0.35,
+      "shadow_obstruction_3deg": 0.225
+    }
+  },
+  {
+    "id": "SYNTH_HAWORTH",
+    "body": "Moon",
+    "region_name": "Haworth (SYNTHETIC values)",
+    "test_profile": "P3CombinedTerrainShadow",
+    "resolution_m": 2.0,
+    "vertical_uncertainty_m": 0.35,
+    "features": {
+      "rms_slope_1x": 21.0,
+      "rms_slope_3x": 17.849999999999998,
+      "rms_slope_9x": 13.65,
+      "roughness_1x": 0.85,
+      "roughness_3x": 1.19,
+      "roughness_9x": 1.87,
+      "shadow_obstruction_1deg": 0.9,
+      "shadow_obstruction_2deg": 0.63,
+      "shadow_obstruction_3deg": 0.405
+    }
+  }
+]

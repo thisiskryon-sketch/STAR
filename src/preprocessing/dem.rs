@@ -110,3 +110,53 @@ impl RasterGrid {
         Some((min, max))
     }
 }
+
+/// Aggregate square pixels to a coarser square grid using valid-pixel averages.
+/// Incomplete output blocks remain NoData when their valid coverage is below the
+/// supplied threshold; they are never filled with an invented zero elevation.
+pub fn downsample_average(
+    grid: &RasterGrid,
+    factor: usize,
+    min_valid_ratio: f64,
+) -> Result<RasterGrid, String> {
+    if factor <= 1 {
+        return Err("Downsample factor must be greater than one".into());
+    }
+    if !(min_valid_ratio.is_finite() && (0.0..=1.0).contains(&min_valid_ratio)) {
+        return Err("Minimum valid-pixel ratio must be within 0..=1".into());
+    }
+    let width = grid.width / factor;
+    let height = grid.height / factor;
+    if width == 0 || height == 0 {
+        return Err("Downsample factor is larger than the raster".into());
+    }
+    let block_size = factor
+        .checked_mul(factor)
+        .ok_or("Downsample block size overflow")?;
+    let mut values = Vec::with_capacity(width * height);
+    let mut mask = Vec::with_capacity(width * height);
+    for out_y in 0..height {
+        for out_x in 0..width {
+            let mut sum = 0.0;
+            let mut valid = 0usize;
+            for dy in 0..factor {
+                for dx in 0..factor {
+                    if let Some(value) = grid.get(out_x * factor + dx, out_y * factor + dy) {
+                        sum += value;
+                        valid += 1;
+                    }
+                }
+            }
+            let is_valid = valid > 0 && valid as f64 / block_size as f64 >= min_valid_ratio;
+            values.push(if is_valid { sum / valid as f64 } else { 0.0 });
+            mask.push(is_valid);
+        }
+    }
+    RasterGrid::new_masked(
+        width,
+        height,
+        grid.cell_size_m * factor as f64,
+        values,
+        mask,
+    )
+}

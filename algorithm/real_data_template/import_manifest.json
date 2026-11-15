@@ -1,0 +1,60 @@
+{
+  "sources": [
+    {
+      "file": "moon_site01.json",
+      "vertical_uncertainty_m": 0.5,
+      "source_version": "PGDA product 78 LOLA 5 m/pix Site01_final_adj_5mpp_surf.tif, resampled to 30 m (average)",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "moon_site04.json",
+      "vertical_uncertainty_m": 0.5,
+      "source_version": "PGDA product 78 LOLA 5 m/pix Site04_final_adj_5mpp_surf.tif, resampled to 30 m (average)",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_meteor_crater.json",
+      "vertical_uncertainty_m": 6.0,
+      "source_version": "NASADEM v001 via OpenTopography (doi:10.5069/G93T9FD9), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_mauna_kea.json",
+      "vertical_uncertainty_m": 6.0,
+      "source_version": "NASADEM v001 via OpenTopography (doi:10.5069/G93T9FD9), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_atacama.json",
+      "vertical_uncertainty_m": 6.0,
+      "source_version": "NASADEM v001 via OpenTopography (doi:10.5069/G93T9FD9), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_tolbachik.json",
+      "vertical_uncertainty_m": 6.0,
+      "source_version": "NASADEM v001 via OpenTopography (doi:10.5069/G93T9FD9), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_amazon.json",
+      "vertical_uncertainty_m": 6.0,
+      "source_version": "NASADEM v001 via OpenTopography (doi:10.5069/G93T9FD9), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    },
+    {
+      "file": "earth_haughton.json",
+      "vertical_uncertainty_m": 17.0,
+      "source_version": "ASTER GDEM v003 tile ASTGTMV003_N75W090 (doi:10.5067/ASTER/ASTGTM.003), UTM 30 m",
+      "processing_version": "star_backend + lowsun patch (fill in commit hash)",
+      "data_origin": "ExternalMeasured"
+    }
+  ]
+}

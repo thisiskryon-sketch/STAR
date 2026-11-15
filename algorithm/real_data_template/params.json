@@ -1,0 +1,18 @@
+{
+  "min_valid_pixel_ratio": 0.9,
+  "max_vertical_uncertainty_m": 20.0,
+  "epsilon_mission_distance": 1.0,
+  "epsilon_is_hard_constraint": false,
+  "knn_k": 5,
+  "min_knn_support": 2,
+  "spatial_thinning_radius_km": 1.0,
+  "joint_support_radius": 0.1,
+  "max_resolution_ratio": 1.5,
+  "clean_ray_ratio_threshold": 0.85,
+  "top_n_dossiers": 10,
+  "min_quality_for_supported_rarity": 0.75,
+  "hard_constraint_sigma_margin": 2.0,
+  "sensitivity_trials": 200,
+  "exact_check_max_assets": 16,
+  "synthetic_evidence_policy": "Strict"
+}

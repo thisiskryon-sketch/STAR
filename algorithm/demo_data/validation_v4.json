@@ -1,0 +1,49 @@
+[
+  {
+    "protocol": "Leave-one-positive-region-out: pool = held-out region + all non-positive regions; relevant = held-out region only. Mission distance uses spec tolerances, so no scale is fitted on the pool.",
+    "k": 4,
+    "folds": [
+      {
+        "holdout_region": "Iceland_Highlands",
+        "pool_size": 54,
+        "relevant_cells": 3,
+        "precision_at_k": 0.75,
+        "recall_at_k": 1.0,
+        "r_precision": 1.0,
+        "ndcg_at_k": 1.0
+      },
+      {
+        "holdout_region": "Kamchatka_Volcanic",
+        "pool_size": 55,
+        "relevant_cells": 4,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "r_precision": 1.0,
+        "ndcg_at_k": 1.0
+      }
+    ],
+    "macro_precision_at_k": 0.875,
+    "macro_recall_at_k": 1.0,
+    "macro_r_precision": 1.0,
+    "macro_ndcg_at_k": 1.0,
+    "negative_control_cells_in_global_top_k": 0,
+    "caveat": "Positive labels are known-analog roles, not proof of analogy for this experiment; on synthetic data this checks code logic only, not scientific accuracy."
+  },
+  {
+    "trials": 200,
+    "noise_model": "Independent Gaussian per (trial, cell, feature) with the cell's reported 1-sigma; assumed sigma (slope 1°, roughness 0.05 m, shadow 0.03) where unreported.",
+    "cells_with_assumed_sigma": 3,
+    "mean_spearman_rho": 0.9463231720446649,
+    "min_spearman_rho": 0.9101171983143129,
+    "top1_stability": 0.21,
+    "top_k_inclusion_probability": {
+      "ICE_POS_1": 0.55,
+      "ICE_POS_2": 0.61,
+      "ICE_POS_3": 0.74,
+      "KAM_POS_1": 0.755,
+      "KAM_POS_2": 0.845,
+      "KAM_POS_3": 0.785,
+      "KAM_POS_4": 0.715
+    }
+  }
+]
