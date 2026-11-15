@@ -1,19 +1,20 @@
-use eframe::egui;
-use star_backend::export::{SourceMeta, records_from_tiles, write_cells};
+use star_backend::export::{records_from_tiles_with_lowsun, write_cells, SourceMeta};
 use star_backend::features::multiscale::extract_all_tiles;
-use star_backend::preprocessing::dem::RasterGrid;
+use eframe::egui;
+use star_backend::preprocessing::dem::{downsample_average, RasterGrid};
 use star_backend::preprocessing::dem_batch::{TerrainExtractionReport, extract_terrain_batch};
 use star_backend::preprocessing::geotiff::{GeoTiffDem, load_geotiff};
 use std::f64::consts::PI;
-use std::sync::Arc;
+use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::thread;
 
-const BG: egui::Color32 = egui::Color32::from_rgb(24, 27, 26);
-const PANEL: egui::Color32 = egui::Color32::from_rgb(31, 35, 33);
-const PANEL_2: egui::Color32 = egui::Color32::from_rgb(40, 45, 42);
-const LINE: egui::Color32 = egui::Color32::from_rgb(58, 65, 60);
-const MUTED: egui::Color32 = egui::Color32::from_rgb(164, 172, 166);
-const GREEN: egui::Color32 = egui::Color32::from_rgb(166, 185, 132);
+const BG: egui::Color32 = egui::Color32::from_rgb(5, 16, 28);
+const PANEL: egui::Color32 = egui::Color32::from_rgb(7, 23, 38);
+const PANEL_2: egui::Color32 = egui::Color32::from_rgb(12, 31, 48);
+const LINE: egui::Color32 = egui::Color32::from_rgb(28, 53, 72);
+const MUTED: egui::Color32 = egui::Color32::from_rgb(139, 161, 180);
+const GREEN: egui::Color32 = egui::Color32::from_rgb(126, 198, 111);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Page {
@@ -53,59 +54,70 @@ impl Layer {
 struct StarApp {
     page: Page,
     radius: usize,
-
-    dem: Option<Arc<GeoTiffDem>>,
+    dem: Option<GeoTiffDem>,
     report: Option<TerrainExtractionReport>,
     error: Option<String>,
-    analysis_rx: Option<Receiver<Result<TerrainExtractionReport, String>>>,
-    analysis_running: bool,
-
     layer: Layer,
     texture: Option<egui::TextureHandle>,
     texture_layer: Option<Layer>,
     selected: Option<(usize, usize)>,
-
     zoom: f32,
     pan: egui::Vec2,
     show_grid: bool,
-
     export_body: String,
     export_region: String,
     export_role: String,
     export_dem_name: String,
     export_tile_px: usize,
-    export_q_min: f64,
+    export_quality_min: f64,
     export_status: Option<String>,
+    export_rx: Option<Receiver<Result<String, String>>>,
+    export_running: bool,
+    import_rx: Option<Receiver<Result<String, String>>>,
+    import_output_dir: Option<PathBuf>,
+    import_running: bool,
+    discovery_dir: Option<PathBuf>,
+    discovery_target_id: String,
+    discovery_report: Option<star_core::DiscoveryReport>,
+    discovery_error: Option<String>,
+    discovery_status: Option<String>,
+    discovery_rx: Option<Receiver<Result<star_core::DiscoveryReport, String>>>,
+    discovery_running: bool,
 }
-
 impl Default for StarApp {
     fn default() -> Self {
         Self {
             page: Page::Terrain,
             radius: 2,
-
             dem: None,
             report: None,
             error: None,
-            analysis_rx: None,
-            analysis_running: false,
-
             layer: Layer::Hillshade,
             texture: None,
             texture_layer: None,
             selected: None,
-
             zoom: 1.0,
             pan: egui::Vec2::ZERO,
             show_grid: false,
-
             export_body: "earth".into(),
-            export_region: "Unknown".into(),
+            export_region: String::new(),
             export_role: "candidate".into(),
             export_dem_name: String::new(),
             export_tile_px: 64,
-            export_q_min: 0.90,
+            export_quality_min: 0.90,
             export_status: None,
+            export_rx: None,
+            export_running: false,
+            import_rx: None,
+            import_output_dir: None,
+            import_running: false,
+            discovery_dir: None,
+            discovery_target_id: String::new(),
+            discovery_report: None,
+            discovery_error: None,
+            discovery_status: None,
+            discovery_rx: None,
+            discovery_running: false,
         }
     }
 }
@@ -119,7 +131,7 @@ impl StarApp {
             self.report = None;
             match load_geotiff(&path) {
                 Ok(dem) => {
-                    self.dem = Some(Arc::new(dem));
+                    self.dem = Some(dem);
                     self.invalidate_map();
                 }
                 Err(e) => self.error = Some(e),
@@ -146,7 +158,7 @@ impl StarApp {
         }
         match RasterGrid::new(w, h, 30.0, z) {
             Ok(grid) => {
-                self.dem = Some(Arc::new(GeoTiffDem {
+                self.dem = Some(GeoTiffDem {
                     grid,
                     path: "synthetic_demo_dem".into(),
                     epsg: 32767,
@@ -155,7 +167,7 @@ impl StarApp {
                     origin_y: 0.0,
                     pixel_size_m: 30.0,
                     nodata: None,
-                }));
+                });
                 self.report = None;
                 self.error = None;
                 self.invalidate_map();
@@ -163,128 +175,229 @@ impl StarApp {
             Err(e) => self.error = Some(e),
         }
     }
-    fn run_analysis(&mut self, ctx: &egui::Context) {
-        if self.analysis_running {
-            return;
-        }
+    fn run_analysis(&mut self) {
         self.error = None;
         self.report = None;
         let Some(dem) = &self.dem else {
             self.error = Some("Load a DEM before running analysis.".into());
             return;
         };
-        let dem = Arc::clone(dem);
-        let radius = self.radius;
-        let (tx, rx) = mpsc::channel();
-        let repaint_ctx = ctx.clone();
-        match std::thread::Builder::new()
-            .name("star-terrain-analysis".into())
-            .spawn(move || {
-                let result = extract_terrain_batch(&dem.grid, radius);
-                let _ = tx.send(result);
-                repaint_ctx.request_repaint();
-            }) {
-            Ok(_) => {
-                self.analysis_rx = Some(rx);
-                self.analysis_running = true;
-            }
-            Err(error) => self.error = Some(format!("Could not start analysis: {error}")),
+        match extract_terrain_batch(&dem.grid, self.radius) {
+            Ok(r) => self.report = Some(r),
+            Err(e) => self.error = Some(e),
         }
     }
-    fn poll_analysis(&mut self) {
-        let result = match self.analysis_rx.as_ref().map(Receiver::try_recv) {
+    fn choose_discovery_data(&mut self) {
+        if let Some(path) = rfd::FileDialog::new().pick_folder() {
+            self.discovery_dir = Some(path);
+            self.discovery_report = None;
+            self.discovery_error = None;
+        }
+    }
+    fn start_discovery(&mut self, ctx: &egui::Context) {
+        if self.discovery_running { return; }
+        self.discovery_report = None;
+        self.discovery_error = None;
+        let Some(data_dir) = self.discovery_dir.clone() else {
+            self.discovery_error = Some("Select an imported data folder first.".into());
+            return;
+        };
+        let target_id = (!self.discovery_target_id.trim().is_empty()).then(|| self.discovery_target_id.trim().to_owned());
+        let (tx, rx) = mpsc::channel();
+        let repaint = ctx.clone();
+        match thread::Builder::new().name("star-mission-discovery".into()).spawn(move || {
+            let result = star_backend::discovery::integration::run_discovery(&data_dir, target_id.as_deref());
+            let _ = tx.send(result);
+            repaint.request_repaint();
+        }) {
+            Ok(_) => {
+                self.discovery_rx = Some(rx);
+                self.discovery_running = true;
+            }
+            Err(error) => self.discovery_error = Some(format!("Could not start assessment: {error}")),
+        }
+    }
+    fn poll_discovery(&mut self) {
+        let result = match self.discovery_rx.as_ref().map(Receiver::try_recv) {
             Some(Ok(result)) => Some(Some(result)),
             Some(Err(TryRecvError::Disconnected)) => Some(None),
             Some(Err(TryRecvError::Empty)) | None => None,
         };
         if let Some(result) = result {
-            self.analysis_running = false;
-            self.analysis_rx = None;
+            self.discovery_rx = None;
+            self.discovery_running = false;
             match result {
-                Some(Ok(report)) => self.report = Some(report),
-                Some(Err(error)) => self.error = Some(error),
-                None => self.error = Some("Terrain analysis stopped unexpectedly.".into()),
+                Some(Ok(report)) => self.discovery_report = Some(report),
+                Some(Err(error)) => self.discovery_error = Some(error),
+                None => self.discovery_error = Some("Assessment stopped unexpectedly.".into()),
             }
         }
     }
-    fn export_fingerprints(&mut self) {
-        self.export_status = None;
-
-        let prepared = (|| -> Result<Vec<star_backend::export::CellRecord>, String> {
-            let dem = self
-                .dem
-                .as_ref()
-                .ok_or_else(|| "Load a DEM before exporting fingerprints.".to_string())?;
-
-            if self.export_region.trim().is_empty() {
-                return Err("Region cannot be empty.".into());
-            }
-
-            let dem_name = if self.export_dem_name.trim().is_empty() {
-                dem.path
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or("unnamed_dem")
-                    .to_string()
-            } else {
-                self.export_dem_name.trim().to_string()
-            };
-
-            let meta = SourceMeta {
-                body: self.export_body.clone(),
-                region: self.export_region.trim().to_string(),
-                role: self.export_role.clone(),
-                dem: dem_name,
-                epsg: dem.epsg,
-                origin_x: dem.origin_x,
-                origin_y: dem.origin_y,
-            };
-
-            let tiles = extract_all_tiles(&dem.grid, self.export_tile_px, self.export_q_min);
-
-            if tiles.is_empty() {
-                return Err("No valid tiles found. Reduce tile size or lower minimum Q.".into());
-            }
-
-            records_from_tiles(&tiles, &meta)
-        })();
-
-        let records = match prepared {
-            Ok(records) => records,
-            Err(error) => {
-                self.export_status = Some(format!("ERROR: {error}"));
-                return;
-            }
-        };
-
-        let count = records.len();
-
-        let average_q = if count > 0 {
-            records.iter().map(|cell| cell.quality_q).sum::<f64>() / count as f64
-        } else {
-            0.0
-        };
-
+    fn save_discovery_report(&mut self) {
+        let Some(report) = &self.discovery_report else { return };
         let Some(path) = rfd::FileDialog::new()
-            .add_filter("STAR cells JSON", &["json"])
-            .set_file_name("cells.json")
+            .set_file_name("star_report_v4.json")
             .save_file()
-        else {
-            self.export_status = Some("Export cancelled.".into());
+        else { return };
+        if let Err(error) = serde_json::to_vec_pretty(report)
+            .map_err(|e| e.to_string())
+            .and_then(|json| std::fs::write(&path, json).map_err(|e| e.to_string()))
+        {
+            self.discovery_error = Some(format!("Could not save report: {error}"));
+        }
+    }
+    fn export_discovery_cells(&mut self, ctx: &egui::Context) {
+        if self.export_running { return; }
+        let Some(source_dem) = &self.dem else {
+            self.error = Some("Load a real DEM before exporting discovery features.".into());
             return;
         };
-
-        match write_cells(&path, records) {
-            Ok(()) => {
-                self.export_status = Some(format!(
-                    "SUCCESS | {} fingerprints | Mean Q: {:.3} | {}",
-                    count,
-                    average_q,
-                    path.display()
-                ));
+        if source_dem.path.to_string_lossy().contains("synthetic_demo_dem") {
+            self.error = Some("Synthetic terrain cannot be exported as measured input.".into());
+            return;
+        }
+        let mut dem = source_dem.clone();
+        let ratio = 30.0 / dem.pixel_size_m;
+        let factor = ratio.round() as usize;
+        if factor == 0 || (ratio - factor as f64).abs() > 0.01 {
+            self.error = Some("Discovery features require a DEM resolution that evenly aggregates to 30 m (for example 5 m or 10 m).".into());
+            return;
+        }
+        if factor > 1 {
+            match downsample_average(&dem.grid, factor, 0.85) {
+                Ok(grid) => dem.grid = grid,
+                Err(error) => { self.error = Some(error); return; }
             }
-            Err(error) => {
-                self.export_status = Some(format!("EXPORT FAILED: {error}"));
+        }
+        if (dem.grid.cell_size_m - 30.0).abs() > 0.01 {
+            self.error = Some("Discovery features must be computed at the common 30 m scale.".into());
+            return;
+        }
+        dem.pixel_size_m = 30.0;
+        let meta = SourceMeta {
+            body: self.export_body.trim().to_lowercase(),
+            region: self.export_region.trim().to_owned(),
+            role: self.export_role.trim().to_lowercase(),
+            dem: if self.export_dem_name.trim().is_empty() {
+                dem.path.file_name().and_then(|name| name.to_str()).unwrap_or("unknown DEM").to_owned()
+            } else { self.export_dem_name.trim().to_owned() },
+            epsg: dem.epsg,
+            origin_x: dem.origin_x,
+            origin_y: dem.origin_y,
+        };
+        let Some(path) = rfd::FileDialog::new().set_file_name("star_source_cells.json").save_file() else { return; };
+        let dem = dem.clone();
+        let tile_px = self.export_tile_px;
+        let quality_min = self.export_quality_min;
+        let (tx, rx) = mpsc::channel();
+        let repaint = ctx.clone();
+        match thread::Builder::new().name("star-feature-export".into()).spawn(move || {
+            let result = (|| {
+                let tiles = extract_all_tiles(&dem.grid, tile_px, quality_min);
+                if tiles.is_empty() { return Err("No tiles meet the selected valid-pixel threshold.".into()); }
+                let tile_count = tiles.len();
+                let (records, shadow_count) = records_from_tiles_with_lowsun(&tiles, &meta, &dem.grid)?;
+                if shadow_count == 0 {
+                    return Err("No tile has complete 3 km low-sun rays. Use a padded DEM and place the study tiles at least 3 km from its edges.".into());
+                }
+                write_cells(&path, records)?;
+                Ok(format!("Exported {tile_count} tiles to {}; {shadow_count} have complete low-sun features.", path.display()))
+            })();
+            let _ = tx.send(result);
+            repaint.request_repaint();
+        }) {
+            Ok(_) => {
+                self.export_rx = Some(rx);
+                self.export_running = true;
+                self.export_status = Some("Calculating terrain and 3 km low-sun rays…".into());
+                self.error = None;
+            }
+            Err(error) => self.error = Some(format!("Could not start feature export: {error}")),
+        }
+    }
+    fn poll_export(&mut self) {
+        let result = match self.export_rx.as_ref().map(Receiver::try_recv) {
+            Some(Ok(result)) => Some(Some(result)),
+            Some(Err(TryRecvError::Disconnected)) => Some(None),
+            Some(Err(TryRecvError::Empty)) | None => None,
+        };
+        if let Some(result) = result {
+            self.export_rx = None;
+            self.export_running = false;
+            match result {
+                Some(Ok(status)) => self.export_status = Some(status),
+                Some(Err(error)) => self.error = Some(error),
+                None => self.error = Some("Feature export stopped unexpectedly.".into()),
+            }
+        }
+    }
+    fn start_import(&mut self, ctx: &egui::Context) {
+        if self.import_running { return; }
+        let Some(manifest_path) = rfd::FileDialog::new()
+            .add_filter("STAR import manifest", &["json"])
+            .pick_file()
+        else { return; };
+        let Some(output_dir) = rfd::FileDialog::new().pick_folder() else { return; };
+        let manifest_for_worker = manifest_path.clone();
+        let output_for_worker = output_dir.clone();
+        let (tx, rx) = mpsc::channel();
+        let repaint = ctx.clone();
+        match thread::Builder::new().name("star-data-import".into()).spawn(move || {
+            let result = star_cli::import::run_import(&manifest_for_worker, &output_for_worker, false)
+                .map_err(|error| error.to_string())
+                .and_then(|report| {
+                    let source_dir = manifest_for_worker.parent().unwrap_or(std::path::Path::new("."));
+                    let mut copied = Vec::new();
+                    for name in ["mission_spec.json", "params.json", "evidence.json", "labs.json", "site_windows.json", "campaign_constraints.json"] {
+                        let source = source_dir.join(name);
+                        let destination = output_for_worker.join(name);
+                        if !destination.exists() && source.is_file() {
+                            std::fs::copy(source, destination).map_err(|error| error.to_string())?;
+                            copied.push(name);
+                        }
+                    }
+                    let spec_note = if output_for_worker.join("mission_spec.json").exists() {
+                        String::new()
+                    } else {
+                        " Add a mission_spec.json from the real-data template before running the assessment.".into()
+                    };
+                    Ok(format!("Imported {} Earth cells and {} planetary targets; {} source records skipped. Copied {} mission configuration files.{spec_note}", report.earth_cells_written, report.targets_written, report.skipped.len(), copied.len()))
+                });
+            let _ = tx.send(result);
+            repaint.request_repaint();
+        }) {
+            Ok(_) => {
+                self.import_rx = Some(rx);
+                self.import_output_dir = Some(output_dir);
+                self.import_running = true;
+                self.discovery_error = None;
+            }
+            Err(error) => self.discovery_error = Some(format!("Could not start import: {error}")),
+        }
+    }
+    fn poll_import(&mut self) {
+        let result = match self.import_rx.as_ref().map(Receiver::try_recv) {
+            Some(Ok(result)) => Some(Some(result)),
+            Some(Err(TryRecvError::Disconnected)) => Some(None),
+            Some(Err(TryRecvError::Empty)) | None => None,
+        };
+        if let Some(result) = result {
+            self.import_rx = None;
+            self.import_running = false;
+            match result {
+                Some(Ok(status)) => {
+                    self.discovery_dir = self.import_output_dir.take();
+                    self.discovery_error = None;
+                    self.discovery_status = Some(status);
+                }
+                Some(Err(error)) => {
+                    self.import_output_dir = None;
+                    self.discovery_error = Some(error);
+                }
+                None => {
+                    self.import_output_dir = None;
+                    self.discovery_error = Some("Data import stopped unexpectedly.".into());
+                }
             }
         }
     }
@@ -331,7 +444,7 @@ impl StarApp {
         let gy = (d - u) / (2.0 * dx);
         let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
         let shade =
-            (0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15);
+            ((0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15));
         let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
         let mut sum = 0.0;
         let mut sum2 = 0.0;
@@ -352,21 +465,6 @@ impl StarApp {
         };
         Some((slope, shade, rough, lap))
     }
-    fn sample_relief(g: &RasterGrid, x: usize, y: usize) -> Option<(f64, f64, f64)> {
-        let z = g.get(x, y)?;
-        let dx = g.cell_size_m.max(0.001);
-        let l = g.get(x.saturating_sub(1), y).unwrap_or(z);
-        let r = g.get((x + 1).min(g.width - 1), y).unwrap_or(z);
-        let u = g.get(x, y.saturating_sub(1)).unwrap_or(z);
-        let d = g.get(x, (y + 1).min(g.height - 1)).unwrap_or(z);
-        let gx = (r - l) / (2.0 * dx);
-        let gy = (d - u) / (2.0 * dx);
-        let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
-        let shade =
-            (0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15);
-        let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
-        Some((slope, shade, lap))
-    }
     fn build_texture(&mut self, ctx: &egui::Context) {
         if self.texture.is_some() && self.texture_layer == Some(self.layer) {
             return;
@@ -379,7 +477,7 @@ impl StarApp {
         let Some((min, max)) = g.min_max() else {
             return;
         };
-        let scale = (g.width.max(g.height) as f64 / 900.0).max(1.0);
+        let scale = (g.width.max(g.height) as f64 / 1400.0).max(1.0);
         let w = ((g.width as f64 / scale).ceil() as usize).max(1);
         let h = ((g.height as f64 / scale).ceil() as usize).max(1);
         let mut pixels = Vec::with_capacity(w * h);
@@ -408,7 +506,7 @@ impl StarApp {
                     Layer::Elevation => Self::elevation_color(t),
                     Layer::Hillshade => {
                         let base = Self::elevation_color(t);
-                        let sh = Self::sample_relief(g, x, y)
+                        let sh = Self::sample_metric(g, x, y)
                             .map(|m| m.1 as f32)
                             .unwrap_or(0.5);
                         egui::Color32::from_rgb(
@@ -440,7 +538,7 @@ impl StarApp {
                         ],
                     ),
                     Layer::Curvature => {
-                        let c = Self::sample_relief(g, x, y).map(|m| m.2).unwrap_or(0.0);
+                        let c = Self::sample_metric(g, x, y).map(|m| m.3).unwrap_or(0.0);
                         let q = (c * 10000.0).tanh();
                         if q >= 0.0 {
                             egui::Color32::from_rgb(
@@ -474,7 +572,7 @@ impl StarApp {
     fn panel_frame<R>(ui: &mut egui::Ui, add: impl FnOnce(&mut egui::Ui) -> R) -> R {
         egui::Frame::none()
             .fill(PANEL)
-            .stroke(egui::Stroke::new(1.0_f32, LINE))
+            .stroke(egui::Stroke::new(1.0, LINE))
             .inner_margin(egui::Margin::same(13))
             .show(ui, add)
             .inner
@@ -504,7 +602,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(BG)
-                    .stroke(egui::Stroke::new(1_f32, LINE)),
+                    .stroke(egui::Stroke::new(1., LINE)),
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
@@ -563,7 +661,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1_f32, LINE)),
+                    .stroke(egui::Stroke::new(1., LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical()
@@ -633,7 +731,7 @@ impl StarApp {
                             ui.add_space(6.);
                             for layer in Layer::all() {
                                 let active = self.layer == layer;
-                                let (_color, desc) = match layer {
+                                let (color, desc) = match layer {
                                     Layer::Elevation => {
                                         (egui::Color32::from_rgb(209, 165, 67), "DEM")
                                     }
@@ -707,7 +805,7 @@ impl StarApp {
                                 self.generate_demo();
                             }
                             if ui.button("▶  Run terrain analysis").clicked() {
-                                self.run_analysis(ctx);
+                                self.run_analysis();
                             }
                             ui.horizontal(|ui| {
                                 ui.label(
@@ -715,187 +813,42 @@ impl StarApp {
                                 );
                                 ui.add(egui::Slider::new(&mut self.radius, 1..=8).suffix(" px"));
                             });
+                            ui.separator();
+                            ui.label(egui::RichText::new("DISCOVERY EXPORT").strong().size(10.).color(GREEN));
+                            egui::ComboBox::from_label("Body")
+                                .selected_text(&self.export_body)
+                                .show_ui(ui, |ui| {
+                                    ui.selectable_value(&mut self.export_body, "earth".into(), "Earth");
+                                    ui.selectable_value(&mut self.export_body, "moon".into(), "Moon");
+                                    ui.selectable_value(&mut self.export_body, "mars".into(), "Mars");
+                                });
+                            ui.label("Region");
+                            ui.text_edit_singleline(&mut self.export_region);
+                            ui.label("Role");
+                            egui::ComboBox::from_id_salt("star-export-role")
+                                .selected_text(&self.export_role)
+                                .show_ui(ui, |ui| {
+                                    ui.selectable_value(&mut self.export_role, "candidate".into(), "Candidate");
+                                    ui.selectable_value(&mut self.export_role, "known_analog".into(), "Known analog");
+                                    ui.selectable_value(&mut self.export_role, "negative_control".into(), "Negative control");
+                                });
+                            ui.label("DEM name / product version");
+                            ui.text_edit_singleline(&mut self.export_dem_name);
+                            ui.add(egui::Slider::new(&mut self.export_tile_px, 9..=256).text("Tile pixels"));
+                            ui.add(egui::Slider::new(&mut self.export_quality_min, 0.5..=1.0).text("Minimum valid pixels"));
+                            let export_label = if self.export_running { "Calculating low-sun features…" } else { "Export mission features (30 m rays)" };
+                            if ui.add_enabled(!self.export_running, egui::Button::new(export_label)).clicked() {
+                                self.export_discovery_cells(ctx);
+                            }
+                            if let Some(status) = &self.export_status {
+                                ui.label(egui::RichText::new(status).size(9.).color(GREEN));
+                            }
                             if let Some(e) = &self.error {
                                 ui.colored_label(egui::Color32::LIGHT_RED, e);
                             }
                         });
-                        ui.add_space(7.);
-                        self.export_panel(ui);
                     });
             });
-    }
-    fn export_panel(&mut self, ui: &mut egui::Ui) {
-        Self::panel_frame(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.label(
-                    egui::RichText::new("⬡  FINGERPRINT EXPORT")
-                        .strong()
-                        .size(12.),
-                );
-
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(egui::RichText::new("JSON / TEMP-0").size(8.).color(GREEN));
-                });
-            });
-
-            ui.add_space(8.);
-
-            ui.label(egui::RichText::new("PLANETARY BODY").size(9.).color(GREEN));
-
-            ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.export_body, "earth".to_string(), "Earth");
-
-                ui.selectable_value(&mut self.export_body, "moon".to_string(), "Moon");
-            });
-
-            ui.add_space(5.);
-
-            ui.label(egui::RichText::new("REGION").size(9.).color(GREEN));
-
-            ui.add(
-                egui::TextEdit::singleline(&mut self.export_region)
-                    .hint_text("e.g. Iceland Highlands")
-                    .desired_width(f32::INFINITY),
-            );
-
-            ui.add_space(5.);
-
-            ui.label(egui::RichText::new("DATASET ROLE").size(9.).color(GREEN));
-
-            egui::ComboBox::from_id_source("star-export-role")
-                .selected_text(match self.export_role.as_str() {
-                    "known_analog" => "Known analog",
-                    "negative_control" => "Negative control",
-                    "target" => "Target",
-                    _ => "Candidate",
-                })
-                .width(f32::INFINITY)
-                .show_ui(ui, |ui| {
-                    ui.selectable_value(
-                        &mut self.export_role,
-                        "candidate".to_string(),
-                        "Candidate",
-                    );
-
-                    ui.selectable_value(
-                        &mut self.export_role,
-                        "known_analog".to_string(),
-                        "Known analog",
-                    );
-
-                    ui.selectable_value(
-                        &mut self.export_role,
-                        "negative_control".to_string(),
-                        "Negative control",
-                    );
-
-                    ui.selectable_value(&mut self.export_role, "target".to_string(), "Target");
-                });
-
-            ui.add_space(5.);
-
-            ui.label(egui::RichText::new("DEM IDENTIFIER").size(9.).color(GREEN));
-
-            ui.add(
-                egui::TextEdit::singleline(&mut self.export_dem_name)
-                    .hint_text("Empty = use source filename")
-                    .desired_width(f32::INFINITY),
-            );
-
-            ui.add_space(10.);
-            ui.separator();
-
-            ui.label(egui::RichText::new("TILE CONFIGURATION").strong().size(10.));
-
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("Tile size").size(10.).color(MUTED));
-
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(
-                        egui::RichText::new(format!("{} px", self.export_tile_px))
-                            .strong()
-                            .color(egui::Color32::WHITE),
-                    );
-                });
-            });
-
-            ui.add(egui::Slider::new(&mut self.export_tile_px, 16..=256).text("pixels"));
-
-            ui.add_space(4.);
-
-            ui.horizontal(|ui| {
-                ui.label(
-                    egui::RichText::new("Minimum quality Q")
-                        .size(10.)
-                        .color(MUTED),
-                );
-
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.label(
-                        egui::RichText::new(format!("{:.2}", self.export_q_min))
-                            .strong()
-                            .color(GREEN),
-                    );
-                });
-            });
-
-            ui.add(egui::Slider::new(&mut self.export_q_min, 0.50..=1.00).fixed_decimals(2));
-
-            ui.add_space(8.);
-
-            ui.label(
-                egui::RichText::new("Multiscale features: 1x / 3x / 9x")
-                    .size(9.)
-                    .color(MUTED),
-            );
-
-            ui.label(
-                egui::RichText::new(
-                    "Shadow metrics will be populated when the illumination module is integrated.",
-                )
-                .size(9.)
-                .color(MUTED),
-            );
-
-            ui.add_space(9.);
-
-            let can_export = self.dem.is_some();
-
-            if ui
-                .add_enabled(
-                    can_export,
-                    egui::Button::new(
-                        egui::RichText::new("GENERATE & EXPORT CELLS.JSON")
-                            .strong()
-                            .color(egui::Color32::WHITE),
-                    )
-                    .fill(egui::Color32::from_rgb(24, 91, 75)),
-                )
-                .clicked()
-            {
-                self.export_fingerprints();
-            }
-
-            if !can_export {
-                ui.label(
-                    egui::RichText::new("Load a DEM to enable export.")
-                        .size(9.)
-                        .color(MUTED),
-                );
-            }
-
-            if let Some(status) = &self.export_status {
-                ui.add_space(7.);
-
-                let success = status.starts_with("SUCCESS");
-
-                ui.label(egui::RichText::new(status).size(9.).color(if success {
-                    GREEN
-                } else {
-                    egui::Color32::LIGHT_RED
-                }));
-            }
-        });
     }
     fn profile_chart(ui: &mut egui::Ui, g: &RasterGrid) {
         let row = g.height / 2;
@@ -915,7 +868,7 @@ impl StarApp {
                     egui::pos2(rect.left() + 5., y),
                     egui::pos2(rect.right() - 5., y),
                 ],
-                egui::Stroke::new(1_f32, LINE),
+                egui::Stroke::new(1., LINE),
             );
         }
         let pts: Vec<_> = vals
@@ -930,7 +883,7 @@ impl StarApp {
                 )
             })
             .collect();
-        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8_f32, GREEN)));
+        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8, GREEN)));
         p.text(
             rect.left_top() + egui::vec2(7., 5.),
             egui::Align2::LEFT_TOP,
@@ -954,7 +907,7 @@ impl StarApp {
             .frame(
                 egui::Frame::none()
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1_f32, LINE)),
+                    .stroke(egui::Stroke::new(1., LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
@@ -1043,6 +996,85 @@ impl StarApp {
                 });
             });
     }
+    fn discovery_view(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        let mut choose_data = false;
+        let mut import_manifest = false;
+        let mut run = false;
+        let mut save_report = false;
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.add_space(14.);
+            ui.heading("Mission experiment discovery");
+            ui.label("Runs the bundled star-core v0.6.2 engine against an imported, provenance-tracked dataset.");
+            ui.add_space(10.);
+            ui.horizontal(|ui| {
+                let import_label = if self.import_running { "Import running…" } else { "Import source manifest" };
+                if ui.add_enabled(!self.import_running, egui::Button::new(import_label)).clicked() { import_manifest = true; }
+                if ui.button("Choose imported data folder").clicked() { choose_data = true; }
+                let run_label = if self.discovery_running { "Assessment running…" } else { "Run assessment" };
+                if ui.add_enabled(self.discovery_dir.is_some() && !self.discovery_running, egui::Button::new(run_label)).clicked() { run = true; }
+                if ui.add_enabled(self.discovery_report.is_some(), egui::Button::new("Save JSON report")).clicked() { save_report = true; }
+            });
+            ui.horizontal(|ui| {
+                ui.label("Target ID");
+                ui.add(egui::TextEdit::singleline(&mut self.discovery_target_id).hint_text("optional if the spec selects one"));
+            });
+            if let Some(path) = &self.discovery_dir {
+                ui.add_space(5.);
+                ui.label(egui::RichText::new(path.display().to_string()).monospace().size(10.).color(MUTED));
+            }
+            ui.add_space(9.);
+            Self::panel_frame(ui, |ui| {
+                ui.label(egui::RichText::new("INPUT CONTRACT").strong().size(10.).color(GREEN));
+                ui.label("Required: cells.json, targets.json, mission_spec.json. Optional: catalog.json, evidence.json, labs.json, site_windows.json, params.json, campaign_constraints.json.");
+                ui.label("Export each projected DEM on Terrain Analysis, add the exported files to an import_manifest.json using algorithm/real_data_template, then import that manifest here. The demo_data folder is synthetic.");
+            });
+            if let Some(status) = &self.discovery_status {
+                ui.add_space(6.);
+                ui.colored_label(GREEN, status);
+            }
+            if let Some(error) = &self.discovery_error {
+                ui.add_space(8.);
+                ui.colored_label(egui::Color32::LIGHT_RED, error);
+            }
+            if let Some(report) = &self.discovery_report {
+                ui.add_space(14.);
+                ui.heading("Assessment");
+                ui.label(&report.decision.statement);
+                ui.add_space(6.);
+                egui::Grid::new("star-discovery-summary").num_columns(2).spacing([14., 7.]).show(ui, |ui| {
+                    ui.label("Experiment"); ui.label(&report.mission_spec.experiment_id); ui.end_row();
+                    ui.label("Target"); ui.label(&report.target_id); ui.end_row();
+                    ui.label("QC-valid cells"); ui.label(report.envelope.qc_valid_cells.to_string()); ui.end_row();
+                    ui.label("Joint envelope"); ui.label(format!("{:?}", report.envelope.joint_status)); ui.end_row();
+                    ui.label("Decision"); ui.label(format!("{:?}", report.decision.lead_site)); ui.end_row();
+                    ui.label("Confirmed / testable"); ui.label(format!("{:.0}% / {:.0}%", report.decision.confirmed_coverage * 100., report.decision.testable_coverage * 100.)); ui.end_row();
+                    ui.label("Run ID"); ui.label(egui::RichText::new(&report.manifest.run_id).monospace().size(10.)); ui.end_row();
+                });
+                if report.manifest.is_synthetic_demo {
+                    ui.add_space(7.);
+                    ui.colored_label(egui::Color32::YELLOW, "Synthetic input detected: this run is for logic demonstration, not scientific validation.");
+                }
+                ui.add_space(10.);
+                ui.heading("Candidate rankings");
+                for ranking in &report.mode_rankings {
+                    egui::CollapsingHeader::new(format!("{:?} · {} candidates", ranking.mode, ranking.entries.len()))
+                        .default_open(true)
+                        .show(ui, |ui| {
+                            if ranking.entries.is_empty() { ui.label("No eligible candidates."); }
+                            for (index, entry) in ranking.entries.iter().take(10).enumerate() {
+                                ui.label(format!("{}. {} · {} · mission distance {:.3}", index + 1, entry.region, entry.cell_id, entry.d_mission));
+                            }
+                        });
+                }
+                ui.add_space(8.);
+                ui.label(format!("{} records rejected by quality or mission constraints", report.rejections.len()));
+            }
+        });
+        if import_manifest { self.start_import(ctx); }
+        if choose_data { self.choose_discovery_data(); }
+        if run { self.start_discovery(ctx); }
+        if save_report { self.save_discovery_report(); }
+    }
     fn detail(ui: &mut egui::Ui, label: &str, value: String) {
         ui.horizontal(|ui| {
             ui.label(egui::RichText::new(label).size(10.).color(MUTED));
@@ -1052,7 +1084,11 @@ impl StarApp {
         });
     }
     fn map_view(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        let Some((gw, gh)) = self.dem.as_ref().map(|d| (d.grid.width, d.grid.height)) else {
+        let Some((gw, gh, path)) = self
+            .dem
+            .as_ref()
+            .map(|d| (d.grid.width, d.grid.height, d.path.display().to_string()))
+        else {
             ui.centered_and_justified(|ui| {
                 ui.vertical_centered(|ui| {
                     ui.heading("S.T.A.R. Terrain Workspace");
@@ -1073,9 +1109,9 @@ impl StarApp {
         let Some(tex) = self.texture.clone() else {
             return;
         };
-        ui.horizontal_wrapped(|ui| {
+        ui.horizontal(|ui| {
             ui.label(
-                egui::RichText::new(format!("{}  ·  {} × {}", self.layer.label(), gw, gh))
+                egui::RichText::new(format!("{}  /  {}", path, self.layer.label()))
                     .size(10.)
                     .color(MUTED),
             );
@@ -1118,35 +1154,35 @@ impl StarApp {
                         egui::pos2(x, map_rect.top()),
                         egui::pos2(x, map_rect.bottom()),
                     ],
-                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
                 );
                 painter.line_segment(
                     [
                         egui::pos2(map_rect.left(), y),
                         egui::pos2(map_rect.right(), y),
                     ],
-                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
                 );
             }
         }
         painter.rect_stroke(
             map_rect,
             2.,
-            egui::Stroke::new(1_f32, egui::Color32::from_rgb(91, 126, 137)),
+            egui::Stroke::new(1., egui::Color32::from_rgb(91, 126, 137)),
             egui::StrokeKind::Inside,
         );
         if let Some((x, y)) = self.selected {
             let px = map_rect.left() + map_rect.width() * x as f32 / gw as f32;
             let py = map_rect.top() + map_rect.height() * y as f32 / gh as f32;
             let pos = egui::pos2(px, py);
-            painter.circle_stroke(pos, 8., egui::Stroke::new(2_f32, egui::Color32::WHITE));
+            painter.circle_stroke(pos, 8., egui::Stroke::new(2., egui::Color32::WHITE));
             painter.line_segment(
                 [pos - egui::vec2(13., 0.), pos + egui::vec2(13., 0.)],
-                egui::Stroke::new(1_f32, egui::Color32::WHITE),
+                egui::Stroke::new(1., egui::Color32::WHITE),
             );
             painter.line_segment(
                 [pos - egui::vec2(0., 13.), pos + egui::vec2(0., 13.)],
-                egui::Stroke::new(1_f32, egui::Color32::WHITE),
+                egui::Stroke::new(1., egui::Color32::WHITE),
             );
         }
         if response.clicked() {
@@ -1208,7 +1244,7 @@ impl StarApp {
         painter.circle_stroke(
             compass,
             15.,
-            egui::Stroke::new(1_f32, egui::Color32::from_white_alpha(140)),
+            egui::Stroke::new(1., egui::Color32::from_white_alpha(140)),
         );
         painter.text(
             compass,
@@ -1222,141 +1258,24 @@ impl StarApp {
 
 impl eframe::App for StarApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.poll_analysis();
-        if self.analysis_running {
-            ctx.request_repaint_after(std::time::Duration::from_millis(100));
-        }
-        egui::CentralPanel::default()
-            .frame(egui::Frame::new().fill(BG).inner_margin(egui::Margin::same(8)))
-            .show(ctx, |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    ui.label(egui::RichText::new("S.T.A.R.").size(22.0).strong());
-                    ui.separator();
-                    ui.selectable_value(&mut self.page, Page::Overview, "Overview");
-                    ui.selectable_value(&mut self.page, Page::Terrain, "Terrain Analysis");
-                    ui.selectable_value(&mut self.page, Page::Discovery, "Analog Discovery");
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.add_enabled(!self.analysis_running, egui::Button::new("Load GeoTIFF")).clicked() { self.load_file(); }
-                        if ui.add_enabled(!self.analysis_running, egui::Button::new("Generate demo")).clicked() { self.generate_demo(); }
-                        let run_label = if self.analysis_running { "Analyzing…" } else { "Run analysis" };
-                        if ui.add_enabled(self.dem.is_some() && !self.analysis_running, egui::Button::new(run_label)).clicked() { self.run_analysis(ctx); }
-                    });
-                });
-                ui.separator();
-
-                let panel_height = ui.available_height();
-                let map_width = (ui.available_width() - 607.0).max(120.0);
-                ui.horizontal(|ui| {
-                    ui.allocate_ui_with_layout(egui::vec2(315.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
-                        egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
-                            Self::panel_frame(ui, |ui| {
-                                ui.label(egui::RichText::new("PROJECT INFORMATION").strong().color(GREEN));
-                                if let Some(dem) = &self.dem {
-                                    let (lo, hi) = dem.grid.min_max().unwrap_or((0.0, 0.0));
-                                    ui.label(format!("Elevation: {lo:.1} to {hi:.1} m"));
-                                    ui.label(format!("{} x {} | {}", dem.grid.width, dem.grid.height, dem.crs_label));
-                                    ui.label(format!("Resolution: {:.1} m", dem.pixel_size_m));
-                                } else { ui.label(egui::RichText::new("No terrain dataset loaded").color(MUTED)); }
-                            });
-                            ui.add_space(7.0);
-                            Self::panel_frame(ui, |ui| {
-                                ui.label(egui::RichText::new("INFORMATION LAYERS").strong().color(GREEN));
-                                for layer in Layer::all() {
-                                    ui.selectable_value(&mut self.layer, layer, layer.label());
-                                }
-                                ui.horizontal(|ui| {
-                                    if ui.add_enabled(!self.analysis_running, egui::Button::new("Load DEM")).clicked() { self.load_file(); }
-                                    if ui.add_enabled(!self.analysis_running, egui::Button::new("Demo")).clicked() { self.generate_demo(); }
-                                });
-                                let run_label = if self.analysis_running { "Analyzing terrain…" } else { "Run terrain analysis" };
-                                if ui.add_enabled(self.dem.is_some() && !self.analysis_running, egui::Button::new(run_label)).clicked() { self.run_analysis(ctx); }
-                                ui.add(egui::Slider::new(&mut self.radius, 1..=8).text("Neighborhood radius (pixels)"));
-                            });
-                            ui.add_space(7.0);
-                            egui::CollapsingHeader::new("Elevation profile").default_open(false).show(ui, |ui| {
-                                if let Some(dem) = &self.dem { Self::profile_chart(ui, &dem.grid); }
-                                else { ui.label("Load a DEM to calculate profile"); }
-                            });
-                            if self.page == Page::Discovery {
-                                self.export_panel(ui);
-                            } else {
-                                egui::CollapsingHeader::new("Fingerprint export").default_open(false).show(ui, |ui| self.export_panel(ui));
-                            }
-                        });
-                    });
-
-                    ui.allocate_ui_with_layout(egui::vec2(map_width, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
-                        egui::Frame::new().fill(BG).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
-                            match self.page {
-                                Page::Terrain => self.map_view(ui, ctx),
-                                Page::Overview => {
-                                    ui.heading("Mission Overview");
-                                    ui.label("Spatio-Temporal & Physical Analog Discovery");
-                                    ui.add_space(15.0);
-                                    ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");
-                                    ui.add_space(12.0);
-                                    if ui.button("Open Terrain Workspace").clicked() { self.page = Page::Terrain; }
-                                    if self.dem.is_none() && ui.button("Generate demo terrain").clicked() { self.generate_demo(); self.page = Page::Terrain; }
-                                }
-                                Page::Discovery => {
-                                    ui.heading("Analog Discovery");
-                                    ui.label("Extract terrain fingerprints here, then export from the left panel.");
-                                    ui.add_space(8.0);
-                                    if let Some(report) = &self.report {
-                                        ui.label(format!("{} valid fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0));
-                                    } else if self.dem.is_none() { ui.label("Load a GeoTIFF or generate demo terrain to begin."); }
-                                    ui.add_space(8.0);
-                                    ui.label(egui::RichText::new("Planetary analog ranking needs reference datasets and is not included in this build.").small().color(MUTED));
-                                }
-                            }
-                        });
-                    });
-
-                    ui.allocate_ui_with_layout(egui::vec2(260.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
-                        egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
-                            Self::panel_frame(ui, |ui| {
-                                ui.label(egui::RichText::new("POINT INSPECTOR").strong().color(GREEN));
-                                if let (Some(dem), Some((x, y))) = (&self.dem, self.selected) {
-                                    ui.heading(format!("{x} , {y}"));
-                                    if let Some(z) = dem.grid.get(x, y) { Self::detail(ui, "Elevation", format!("{z:.2} m")); }
-                                    if let Some((slope, _, roughness, curvature)) = Self::sample_metric(&dem.grid, x, y) {
-                                        Self::detail(ui, "Slope", format!("{slope:.2} deg"));
-                                        Self::detail(ui, "Roughness", format!("{roughness:.2} m"));
-                                        Self::detail(ui, "Curvature", format!("{curvature:.6}"));
-                                    }
-                                } else { ui.label("Click the map to inspect a raster cell."); }
-                            });
-                            ui.add_space(7.0);
-                            Self::panel_frame(ui, |ui| {
-                                ui.label(egui::RichText::new("MAP CONTROLS").strong().color(GREEN));
-                                ui.horizontal_wrapped(|ui| {
-                                    if ui.button("Zoom +").clicked() { self.zoom = (self.zoom * 1.25).clamp(0.35, 8.0); }
-                                    if ui.button("Zoom -").clicked() { self.zoom = (self.zoom / 1.25).clamp(0.35, 8.0); }
-                                    if ui.button("Reset").clicked() { self.zoom = 1.0; self.pan = egui::Vec2::ZERO; }
-                                });
-                                ui.checkbox(&mut self.show_grid, "Show grid");
-                                ui.label(egui::RichText::new("Drag to pan; scroll to zoom; click to inspect.").size(10.0).color(MUTED));
-                            });
-                            ui.add_space(7.0);
-                            Self::panel_frame(ui, |ui| {
-                                ui.label(egui::RichText::new("ANALYSIS STATUS").strong().color(GREEN));
-                                if self.analysis_running {
-                                    ui.horizontal_wrapped(|ui| { ui.spinner(); ui.label("Calculating terrain fingerprints…"); });
-                                } else if let Some(report) = &self.report { ui.label(format!("{} fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0)); }
-                                else { ui.label("Run terrain analysis to see results."); }
-                                if let Some(error) = &self.error { ui.colored_label(egui::Color32::LIGHT_RED, error); }
-                                if let Some(status) = &self.export_status { ui.label(status); }
-                            });
-                        });
-                    });
-                });
-            });
+        self.poll_discovery();
+        self.poll_export();
+        self.poll_import();
+        self.topbar(ctx);
+        self.left_panel(ctx);
+        self.right_panel(ctx);
+        egui::CentralPanel::default().frame(egui::Frame::none().fill(BG).inner_margin(egui::Margin::same(8))).show(ctx,|ui|{
+            if self.page==Page::Overview {ui.heading("Mission Overview");ui.label("Spatio-Temporal & Physical Analog Discovery");ui.add_space(15.);ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");if ui.button("Open Terrain Workspace").clicked(){self.page=Page::Terrain;}}
+            else if self.page==Page::Discovery { self.discovery_view(ui, ctx); }
+            else {self.map_view(ui,ctx);}
+        });
+        ctx.request_repaint_after(std::time::Duration::from_millis(33));
     }
 }
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("S.T.A.R. | Terrain Workbench")
+            .with_title("S.T.A.R. — Geospatial Intelligence")
             .with_inner_size([1600., 1000.])
             .with_min_inner_size([1100., 720.]),
         ..Default::default()
@@ -1370,12 +1289,12 @@ fn main() -> eframe::Result<()> {
             v.window_fill = PANEL;
             v.extreme_bg_color = BG;
             v.faint_bg_color = PANEL_2;
-            v.selection.bg_fill = egui::Color32::from_rgb(57, 70, 52);
-            v.selection.stroke = egui::Stroke::new(1_f32, GREEN);
+            v.selection.bg_fill = egui::Color32::from_rgb(29, 91, 79);
+            v.selection.stroke = egui::Stroke::new(1., GREEN);
             v.widgets.noninteractive.bg_fill = PANEL;
             v.widgets.inactive.bg_fill = PANEL_2;
-            v.widgets.hovered.bg_fill = egui::Color32::from_rgb(51, 59, 49);
-            v.widgets.active.bg_fill = egui::Color32::from_rgb(67, 81, 58);
+            v.widgets.hovered.bg_fill = egui::Color32::from_rgb(23, 57, 72);
+            v.widgets.active.bg_fill = egui::Color32::from_rgb(31, 105, 85);
             cc.egui_ctx.set_visuals(v);
             let mut s = (*cc.egui_ctx.style()).clone();
             s.spacing.item_spacing = egui::vec2(8., 7.);

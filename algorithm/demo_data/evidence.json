@@ -1,0 +1,227 @@
+[
+  {
+    "cell_id": "KAM_POS_1",
+    "mechanisms": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": [
+      {
+        "model_id": "SYNTH_GRAVITY_SLIP_CORRECTION",
+        "mechanism_id": "granular_regolith_shear",
+        "citation_or_source": "SYNTHETIC PLACEHOLDER - not a real model",
+        "evidence_level": "Literature",
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "residual_relative_uncertainty": 0.15,
+        "synthetic_placeholder": true
+      }
+    ]
+  },
+  {
+    "cell_id": "KAM_POS_2",
+    "mechanisms": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": [
+      {
+        "model_id": "SYNTH_GRAVITY_SLIP_CORRECTION",
+        "mechanism_id": "granular_regolith_shear",
+        "citation_or_source": "SYNTHETIC PLACEHOLDER - not a real model",
+        "evidence_level": "Literature",
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "residual_relative_uncertainty": 0.15,
+        "synthetic_placeholder": true
+      }
+    ]
+  },
+  {
+    "cell_id": "KAM_POS_3",
+    "mechanisms": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": [
+      {
+        "model_id": "SYNTH_GRAVITY_SLIP_CORRECTION",
+        "mechanism_id": "granular_regolith_shear",
+        "citation_or_source": "SYNTHETIC PLACEHOLDER - not a real model",
+        "evidence_level": "Literature",
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "residual_relative_uncertainty": 0.15,
+        "synthetic_placeholder": true
+      }
+    ]
+  },
+  {
+    "cell_id": "KAM_POS_4",
+    "mechanisms": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": [
+      {
+        "model_id": "SYNTH_GRAVITY_SLIP_CORRECTION",
+        "mechanism_id": "granular_regolith_shear",
+        "citation_or_source": "SYNTHETIC PLACEHOLDER - not a real model",
+        "evidence_level": "Literature",
+        "valid_feature_bounds": {
+          "RmsSlope1x": [
+            5.0,
+            20.0
+          ],
+          "Roughness1x": [
+            0.1,
+            0.8
+          ]
+        },
+        "residual_relative_uncertainty": 0.15,
+        "synthetic_placeholder": true
+      }
+    ]
+  },
+  {
+    "cell_id": "DEVON_1",
+    "mechanisms": [
+      {
+        "mechanism_id": "sustained_low_sun_illumination",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "ShadowObstruction1Deg": [
+            0.3,
+            0.9
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": []
+  },
+  {
+    "cell_id": "DEVON_2",
+    "mechanisms": [
+      {
+        "mechanism_id": "sustained_low_sun_illumination",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "ShadowObstruction1Deg": [
+            0.3,
+            0.9
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": []
+  },
+  {
+    "cell_id": "DEVON_3",
+    "mechanisms": [
+      {
+        "mechanism_id": "sustained_low_sun_illumination",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {
+          "ShadowObstruction1Deg": [
+            0.3,
+            0.9
+          ]
+        },
+        "independent_validation": false
+      }
+    ],
+    "validated_correction_models": []
+  }
+]

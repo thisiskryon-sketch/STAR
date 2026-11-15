@@ -3,6 +3,14 @@ name = "star_backend"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+members = [
+    "algorithm/star-core",
+    "algorithm/star-cli",
+    "algorithm/star-data",
+]
+resolver = "2"
+
 [dependencies]
 eframe = "0.31"
 
@@ -10,3 +18,5 @@ tiff = "0.11.3"
 rfd = "0.15"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
+star-core = { path = "algorithm/star-core" }
+star-cli = { path = "algorithm/star-cli" }

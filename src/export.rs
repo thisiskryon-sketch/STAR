@@ -261,6 +261,35 @@ pub fn records_from_tiles(
     Ok(records)
 }
 
+/// Export terrain tiles with the low-sun features required by the discovery contract.
+/// Border tiles or tiles with too many incomplete rays keep their shadow values `None`;
+/// the v0.6.2 importer will report and skip those records instead of treating missing
+/// observations as zero obstruction.
+pub fn records_from_tiles_with_lowsun(
+    tiles: &[TileFeatures],
+    meta: &SourceMeta,
+    grid: &crate::preprocessing::dem::RasterGrid,
+) -> Result<(Vec<CellRecord>, usize), String> {
+    let shadows = crate::features::lowsun_shadow::obstruction_by_tile(
+        grid,
+        tiles,
+        crate::features::lowsun_shadow::DEFAULT_MAX_RADIUS_M,
+        crate::features::lowsun_shadow::DEFAULT_CLEAN_RAY_RATIO_THRESHOLD,
+    )?;
+    let mut records = records_from_tiles(tiles, meta)?;
+    let mut complete_shadow_tiles = 0usize;
+    for (record, shadow) in records.iter_mut().zip(shadows) {
+        if let Some([one, two, three]) = shadow {
+            record.shadow_1deg = Some(one);
+            record.shadow_2deg = Some(two);
+            record.shadow_3deg = Some(three);
+            complete_shadow_tiles += 1;
+        }
+    }
+    validate_cells(&records)?;
+    Ok((records, complete_shadow_tiles))
+}
+
 fn temporary_path(path: &Path) -> PathBuf {
     let mut name = path.file_name().unwrap_or_default().to_os_string();
 

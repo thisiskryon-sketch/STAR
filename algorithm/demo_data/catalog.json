@@ -1,0 +1,56 @@
+[
+  {
+    "id": "CAT_TOLBACHIK",
+    "name": "Tolbachik volcanic field",
+    "lat": 55.83,
+    "lon": 160.33,
+    "cluster_radius_km": 80.0,
+    "features": {
+      "rms_slope_1x": 11.0,
+      "rms_slope_3x": 9.35,
+      "rms_slope_9x": 7.15,
+      "roughness_1x": 0.32,
+      "roughness_3x": 0.44799999999999995,
+      "roughness_9x": 0.7040000000000001,
+      "shadow_obstruction_1deg": 0.58,
+      "shadow_obstruction_2deg": 0.40599999999999997,
+      "shadow_obstruction_3deg": 0.261
+    }
+  },
+  {
+    "id": "CAT_HAUGHTON",
+    "name": "Haughton crater, Devon Island",
+    "lat": 75.4,
+    "lon": -89.7,
+    "cluster_radius_km": 30.0,
+    "features": {
+      "rms_slope_1x": 6.0,
+      "rms_slope_3x": 5.1,
+      "rms_slope_9x": 3.9000000000000004,
+      "roughness_1x": 0.12,
+      "roughness_3x": 0.16799999999999998,
+      "roughness_9x": 0.264,
+      "shadow_obstruction_1deg": 0.55,
+      "shadow_obstruction_2deg": 0.385,
+      "shadow_obstruction_3deg": 0.24750000000000003
+    }
+  },
+  {
+    "id": "CAT_ICELAND",
+    "name": "Icelandic highlands",
+    "lat": 64.9,
+    "lon": -16.9,
+    "cluster_radius_km": 40.0,
+    "features": {
+      "rms_slope_1x": 12.0,
+      "rms_slope_3x": 10.2,
+      "rms_slope_9x": 7.800000000000001,
+      "roughness_1x": 0.36,
+      "roughness_3x": 0.504,
+      "roughness_9x": 0.792,
+      "shadow_obstruction_1deg": 0.63,
+      "shadow_obstruction_2deg": 0.44099999999999995,
+      "shadow_obstruction_3deg": 0.28350000000000003
+    }
+  }
+]

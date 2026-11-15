@@ -1,0 +1,10 @@
+{
+  "target_id": "LUNAR_SP_SHACKLETON_01",
+  "positive_regions": [
+    "Kamchatka_Volcanic",
+    "Iceland_Highlands"
+  ],
+  "negative_control_regions": [
+    "Alluvial_Plains"
+  ]
+}

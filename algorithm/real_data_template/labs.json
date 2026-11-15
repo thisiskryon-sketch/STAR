@@ -1,0 +1,22 @@
+[
+  {
+    "facility_id": "GRC_SLOPE",
+    "name": "NASA Glenn SLOPE Lab: 12x3x0.3 m GRC-1 lunar simulant tank + adjustable tilt bed, TREC single-wheel rig (source: nasa.gov/centers-and-facilities/glenn/planetary-exploration-test-facilities)",
+    "reproduces_mechanisms": ["granular_regolith_shear"],
+    "reproduces_features": ["RmsSlope3x"],
+    "cost_units": null,
+    "duration_days": null,
+    "synthetic_placeholder": false,
+    "transfer_evidence": []
+  },
+  {
+    "facility_id": "GRC_VF13",
+    "name": "NASA Glenn VF-13 'dirty' thermal-vacuum chamber, 6.35 m3, up to ~1 t lunar simulant, ~1e-7 Torr (source: NTRS 20120002766, 20180004331)",
+    "reproduces_mechanisms": ["high_vacuum_radiative_transfer"],
+    "reproduces_features": [],
+    "cost_units": null,
+    "duration_days": null,
+    "synthetic_placeholder": false,
+    "transfer_evidence": []
+  }
+]

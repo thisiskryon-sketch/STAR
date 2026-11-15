@@ -1,0 +1,138 @@
+{
+  "mission_id": "DEMO_LUNAR_SOUTH_POLE",
+  "experiment_id": "EXP_ROVER_LOWSUN_MOBILITY_01",
+  "target_body": "Moon",
+  "target_region": "Shackleton_Connecting_Ridge",
+  "target_profile_id": "LUNAR_SP_SHACKLETON_01",
+  "objective": "Rover traction and navigation on rough slopes under low sun (synthetic demo)",
+  "fallback_profile": "P3CombinedTerrainShadow",
+  "required_parameters": [
+    {
+      "requirement_id": "REQ_SLOPE_1X",
+      "feature": "RmsSlope1x",
+      "target_value": 11.5,
+      "acceptable_min": 7.0,
+      "acceptable_max": 16.0,
+      "max_uncertainty": 1.5,
+      "weight": 1.0,
+      "unit": "deg",
+      "criticality": "High"
+    },
+    {
+      "requirement_id": "REQ_ROUGH_1X",
+      "feature": "Roughness1x",
+      "target_value": 0.35,
+      "acceptable_min": 0.15,
+      "acceptable_max": 0.6,
+      "max_uncertainty": 0.1,
+      "weight": 1.0,
+      "unit": "m",
+      "criticality": "Normal"
+    },
+    {
+      "requirement_id": "REQ_SHADOW_1DEG",
+      "feature": "ShadowObstruction1Deg",
+      "target_value": 0.62,
+      "acceptable_min": 0.4,
+      "acceptable_max": 0.85,
+      "max_uncertainty": 0.1,
+      "weight": 1.0,
+      "unit": "ratio",
+      "criticality": "High"
+    }
+  ],
+  "hard_constraints": [
+    {
+      "constraint_id": "HC_SAFE_SLOPE",
+      "feature": "RmsSlope1x",
+      "min_allowed": 2.0,
+      "max_allowed": 24.0,
+      "max_resolution_mismatch_ratio": 4.0
+    }
+  ],
+  "transfer_requirements": [
+    {
+      "requirement_id": "TR_TRACTION",
+      "engineering_decision": "Wheel slip threshold calibration",
+      "required_mechanism_id": "granular_regolith_shear",
+      "requires_validated_correction_model": true,
+      "depends_on_parameters": [
+        "REQ_SLOPE_1X",
+        "REQ_ROUGH_1X"
+      ],
+      "weight": 1.0,
+      "criticality": "MissionCritical"
+    },
+    {
+      "requirement_id": "TR_LOWSUN_NAV",
+      "engineering_decision": "Navigation camera / LiDAR performance in long shadows",
+      "required_mechanism_id": "sustained_low_sun_illumination",
+      "requires_validated_correction_model": false,
+      "depends_on_parameters": [
+        "REQ_SHADOW_1DEG"
+      ],
+      "weight": 1.0,
+      "criticality": "MissionCritical"
+    },
+    {
+      "requirement_id": "TR_VACUUM_OPTICS",
+      "engineering_decision": "Optics and dust behaviour in vacuum",
+      "required_mechanism_id": "high_vacuum_radiative_transfer",
+      "requires_validated_correction_model": false,
+      "depends_on_parameters": [],
+      "weight": 1.0,
+      "criticality": "High"
+    },
+    {
+      "requirement_id": "TR_GRAVITY_SINKAGE",
+      "engineering_decision": "Sinkage and slip under sustained 1/6 g",
+      "required_mechanism_id": "sustained_lunar_gravity",
+      "requires_validated_correction_model": true,
+      "depends_on_parameters": [],
+      "weight": 1.0,
+      "criticality": "MissionCritical"
+    }
+  ],
+  "mechanisms": [
+    {
+      "mechanism_id": "granular_regolith_shear",
+      "description": "Wheel-soil shear in loose granular material",
+      "venues": [
+        "FieldSite",
+        "Laboratory"
+      ],
+      "field_min_abs_latitude_deg": null,
+      "note": "Volcanic tephra fields and simulant soil bins approximate shear; 1/6 g needs a correction model.",
+      "requires_field_time_window": false
+    },
+    {
+      "mechanism_id": "sustained_low_sun_illumination",
+      "description": "Multi-hour sun elevation below ~3° with long shadows sweeping in azimuth",
+      "venues": [
+        "FieldSite",
+        "Laboratory"
+      ],
+      "field_min_abs_latitude_deg": 66.0,
+      "note": "Declared condition (input data): sustained in the field only at high latitude, in specific seasonal windows.",
+      "requires_field_time_window": true
+    },
+    {
+      "mechanism_id": "high_vacuum_radiative_transfer",
+      "description": "Radiative-only heat exchange and dust behaviour in high vacuum",
+      "venues": [
+        "Laboratory"
+      ],
+      "field_min_abs_latitude_deg": null,
+      "note": "Only thermal-vacuum chambers; no field site has vacuum.",
+      "requires_field_time_window": false
+    },
+    {
+      "mechanism_id": "sustained_lunar_gravity",
+      "description": "Continuous 1/6 g loading of soil and vehicle",
+      "venues": [],
+      "field_min_abs_latitude_deg": null,
+      "note": "Parabolic flights give seconds only; sustained 1/6 g is irreducible on Earth.",
+      "requires_field_time_window": false
+    }
+  ]
+}

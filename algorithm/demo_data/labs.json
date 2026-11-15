@@ -1,0 +1,58 @@
+[
+  {
+    "facility_id": "TVAC_DUSTY_OPTICS",
+    "name": "Thermal-vacuum chamber with dust (placeholder)",
+    "reproduces_mechanisms": [
+      "high_vacuum_radiative_transfer"
+    ],
+    "reproduces_features": [],
+    "cost_units": 25.0,
+    "duration_days": 5.0,
+    "synthetic_placeholder": true,
+    "transfer_evidence": [
+      {
+        "mechanism_id": "high_vacuum_radiative_transfer",
+        "level": "LabValidated",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {},
+        "independent_validation": false
+      }
+    ]
+  },
+  {
+    "facility_id": "SOILBIN_TILTBED",
+    "name": "Simulant soil bin with tilt bed (placeholder)",
+    "reproduces_mechanisms": [
+      "granular_regolith_shear"
+    ],
+    "reproduces_features": [
+      "RmsSlope1x"
+    ],
+    "cost_units": 20.0,
+    "duration_days": 7.0,
+    "synthetic_placeholder": true,
+    "transfer_evidence": [
+      {
+        "mechanism_id": "granular_regolith_shear",
+        "level": "Literature",
+        "source": "SYNTHETIC PLACEHOLDER - replace with a real reference",
+        "synthetic_placeholder": true,
+        "valid_feature_bounds": {},
+        "independent_validation": false
+      }
+    ]
+  },
+  {
+    "facility_id": "LOWSUN_LIGHT_RIG",
+    "name": "Low-angle collimated light rig (placeholder)",
+    "reproduces_mechanisms": [
+      "sustained_low_sun_illumination"
+    ],
+    "reproduces_features": [],
+    "cost_units": 10.0,
+    "duration_days": 3.0,
+    "synthetic_placeholder": true,
+    "transfer_evidence": []
+  }
+]
