@@ -1,0 +1,29 @@
+{
+  "schema_version": "star-prep-1",
+  "created_utc": "2026-11-15T20:43:36+00:00",
+  "body": "earth",
+  "region": "Mauna_Kea",
+  "dem": "NASADEM v001, OpenTopography public mirror",
+  "inputs": [
+    "data/earth/raw/NASADEM_HGT_n19w156.tif",
+    "data/earth/raw/NASADEM_HGT_n19w155.tif"
+  ],
+  "output": "data/earth/processed/Mauna_Kea_30m.tif",
+  "target_srs": "EPSG:32605",
+  "resolution_m": 30.0,
+  "resample": "average",
+  "bbox_lonlat": [
+    -155.58,
+    19.7,
+    -155.36,
+    19.94
+  ],
+  "nodata": -9999.0,
+  "size_px": [
+    782,
+    898
+  ],
+  "valid_cells": 702236,
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2"
+}

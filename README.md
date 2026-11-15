@@ -20,7 +20,7 @@
 
 S.T.A.R. (Scientific Terrain Analysis and Recognition) is a native desktop research prototype designed to explore how terrestrial landscapes can be characterized and compared with candidate locations on the Moon and Mars.
 
-The current implementation focuses on **digital elevation model (DEM) ingestion and terrain-feature extraction**. It provides a foundation for a broader workflow in which terrain morphology and, as the project evolves, thermal and environmental signatures can support the search for planetary surface analogs.
+The current implementation combines **terrain analysis** with an integrated **planetary analog discovery workflow**. It loads projected digital elevation models (DEMs), derives terrain features and low-sun obstruction measurements, imports prepared source data, and runs the bundled STAR v0.6.2 candidate-assessment algorithm without changing its core logic.
 
 > **Project status:** S.T.A.R. is under active development. The current terrain-analysis workflow is implemented as a research prototype. Full Earth–Moon–Mars analog ranking and validated planetary datasets should not be considered complete unless explicitly demonstrated by the current code and included datasets.
 
@@ -39,6 +39,9 @@ The current implementation focuses on **digital elevation model (DEM) ingestion 
 - Batch processing of raster cells and coverage reporting.
 - Terrain visualizations, including an elevation map, elevation profile and elevation distribution.
 - Synthetic DEM generation for testing the workflow without external datasets.
+- Import of prepared terrain data through a source manifest, with skipped records and provenance retained by the importer.
+- Low-sun obstruction measurements at 1, 2 and 3 degrees when the DEM has the required 3 km padding and sufficient valid samples.
+- Candidate assessment through the bundled STAR discovery engine, with a report that identifies synthetic inputs.
 
 ## Technology
 
@@ -87,7 +90,11 @@ On Windows, these commands can be executed from PowerShell in the project direct
 
 ### Mission discovery with real DEM data
 
-The v0.6.2 mission-discovery engine is included in `algorithm/star-core` and is called directly by the desktop app's **Analog Discovery** page. It is kept separate from the existing terrain-analysis library. See [the integration guide](algorithm/INTEGRATION.md) for the NASA DEM workflow, input bundle contract, and import command. The files in `algorithm/demo_data` are synthetic logic-demo inputs, not scientific results.
+The v0.6.2 mission-discovery engine is included in `algorithm/star-core` and is called directly by the desktop app's **Analog Discovery** page. The app's **Terrain Analysis** page prepares DEM features, while **Analog Discovery** imports a manifest and runs the assessment on that prepared bundle. See [the integration guide](algorithm/INTEGRATION.md) for the NASA DEM workflow, input bundle contract, and import command. The files in `algorithm/demo_data` are synthetic logic-demo inputs, not scientific results.
+
+### Data needed for a real campaign
+
+Source DEMs for all six lunar targets and six Earth regions have been downloaded and prepared locally at a common 30 m scale, with surrounding terrain for low-sun calculations. Large source and prepared GeoTIFFs are excluded from Git; [data/README.md](data/README.md) explains how to fetch and prepare them. The high-latitude Haughton region uses Copernicus GLO-30 because NASADEM does not cover that latitude and ASTER downloads require Earthdata access. Product-level uncertainties and citations are recorded in the data notes and preparation metadata. These inputs enable real-data processing, but the scientific assessment still needs verification and transfer evidence; synthetic demo files are not scientific results.
 
 ## Working with elevation data
 
@@ -178,11 +185,12 @@ Large raster datasets are intentionally not stored in the Git repository. Keep s
 - [x] Batch terrain extraction and coverage reporting
 - [x] Initial terrain visualization and analysis workflow
 - [ ] Expanded raster format and CRS support
-- [ ] Advanced terrain layers (slope, hillshade and contours)
+- [x] Terrain layers (slope and hillshade)
+- [x] Integrated STAR v0.6.2 candidate-assessment workflow
 - [ ] Interactive 3D terrain visualization
 - [ ] Thermal and temporal feature integration
-- [ ] Planetary DEM ingestion for lunar and Martian regions
-- [ ] Earth–Moon–Mars analog scoring and validation
+- [ ] Complete planetary DEM coverage for lunar and Martian regions
+- [ ] Complete Earth–Moon–Mars analog scoring and scientific validation
 - [ ] Reproducible benchmark datasets and scientific evaluation
 
 ## Contributing

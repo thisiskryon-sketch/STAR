@@ -34,8 +34,8 @@ Export from the app with body = `moon`, region = site name.
 
 - **≤ 60° latitude:** NASADEM (NASA JPL).
   - OpenTopography, doi:10.5069/G93T9FD9, or LP DAAC.
-- **> 60° latitude:** ASTER GDEM v003 (NASA/METI, LP DAAC, doi:10.5067/ASTER/ASTGTM.003).
-  - Covers 83°N–83°S; NASADEM/SRTM stops at 60°N.
+- **> 60° latitude:** ASTER GDEM v003 (NASA/METI, LP DAAC, doi:10.5067/ASTER/ASTGTM.003) is the original planned source. It requires NASA Earthdata authentication. For the prepared Haughton site in this checkout, Copernicus GLO-30 was used as a traceable global-coverage substitute; it is a DSM and must be identified as such in results.
+  - Copernicus GLO-30 covers Haughton and has published absolute vertical accuracy <4 m (90% linear error). Use 4 m as a conservative product-level uncertainty bound, not a site-specific sigma.
 
 Vertical uncertainty values in `import_manifest.json`:
 - NASADEM: 6 m — from ~10 m relative LE90 → σ ≈ 6 m. **Verify in the NASADEM user guide.**
@@ -51,7 +51,7 @@ gdalwarp -t_srs EPSG:<UTM> -tr 30 30 -r bilinear in.tif region_utm30.tif
 
 | Region (app `region`) | Role (app `role`) | Lat, lon | DEM | UTM EPSG |
 |---|---|---|---|---|
-| Haughton_Devon | known_analog | 75.4, −89.7 | ASTER GDEM | 32616 |
+| Haughton_Devon | known_analog | 75.4, −89.7 | Copernicus GLO-30 | 32616 |
 | Meteor_Crater | known_analog | 35.03, −111.02 | NASADEM | 32612 |
 | Mauna_Kea | known_analog | 19.82, −155.47 | NASADEM | 32605 |
 | Atacama | known_analog | −24.5, −69.25 | NASADEM | 32719 |
