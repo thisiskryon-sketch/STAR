@@ -43,6 +43,15 @@ pub fn calculate_local_relief(
     y: usize,
     radius_cells: usize,
 ) -> Option<f64> {
+    calculate_local_metrics(grid, x, y, radius_cells).map(|(relief, _)| relief)
+}
+
+fn calculate_local_metrics(
+    grid: &RasterGrid,
+    x: usize,
+    y: usize,
+    radius_cells: usize,
+) -> Option<(f64, f64)> {
     if radius_cells == 0 {
         return None;
     }
@@ -58,17 +67,25 @@ pub fn calculate_local_relief(
 
     let mut min_elevation = f64::INFINITY;
     let mut max_elevation = f64::NEG_INFINITY;
+    let mut count = 0.0;
+    let mut mean = 0.0;
+    let mut sum_squared_differences = 0.0;
 
     for row in y_start..=y_end {
         for col in x_start..=x_end {
             let elevation = grid.get(col, row)?;
-
             min_elevation = min_elevation.min(elevation);
             max_elevation = max_elevation.max(elevation);
+
+            count += 1.0;
+            let delta = elevation - mean;
+            mean += delta / count;
+            sum_squared_differences += delta * (elevation - mean);
         }
     }
 
-    Some(max_elevation - min_elevation)
+    let roughness = (sum_squared_differences / count).max(0.0).sqrt();
+    Some((max_elevation - min_elevation, roughness))
 }
 
 pub fn calculate_roughness(
@@ -77,38 +94,7 @@ pub fn calculate_roughness(
     y: usize,
     radius_cells: usize,
 ) -> Option<f64> {
-    if radius_cells == 0 {
-        return None;
-    }
-
-    let x_start = x.checked_sub(radius_cells)?;
-    let y_start = y.checked_sub(radius_cells)?;
-    let x_end = x.checked_add(radius_cells)?;
-    let y_end = y.checked_add(radius_cells)?;
-
-    if x_end >= grid.width || y_end >= grid.height {
-        return None;
-    }
-
-    let mut values = Vec::new();
-
-    for row in y_start..=y_end {
-        for col in x_start..=x_end {
-            values.push(grid.get(col, row)?);
-        }
-    }
-
-    let count = values.len() as f64;
-
-    let mean = values.iter().sum::<f64>() / count;
-
-    let variance = values
-        .iter()
-        .map(|value| (value - mean).powi(2))
-        .sum::<f64>()
-        / count;
-
-    Some(variance.sqrt())
+    calculate_local_metrics(grid, x, y, radius_cells).map(|(_, roughness)| roughness)
 }
 
 pub fn calculate_curvature(grid: &RasterGrid, x: usize, y: usize) -> Option<f64> {
@@ -137,7 +123,6 @@ pub fn calculate_curvature(grid: &RasterGrid, x: usize, y: usize) -> Option<f64>
     Some(d2x + d2y)
 }
 
-// Calculates a complete terrain fingerprint for one DEM cell.
 pub fn calculate_terrain_fingerprint(
     grid: &RasterGrid,
     x: usize,
@@ -146,8 +131,7 @@ pub fn calculate_terrain_fingerprint(
 ) -> Option<crate::models::terrain::TerrainFingerprint> {
     let elevation = grid.get(x, y)?;
     let slope = calculate_slope(grid, x, y)?;
-    let local_relief = calculate_local_relief(grid, x, y, radius_cells)?;
-    let roughness = calculate_roughness(grid, x, y, radius_cells)?;
+    let (local_relief, roughness) = calculate_local_metrics(grid, x, y, radius_cells)?;
     let curvature = calculate_curvature(grid, x, y)?;
 
     Some(crate::models::terrain::TerrainFingerprint {

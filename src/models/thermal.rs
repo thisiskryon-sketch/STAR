@@ -27,8 +27,6 @@ impl ThermalResponseSignature {
 
         check_non_negative(self.seasonal_amplitude_k, "seasonal_amplitude_k")?;
 
-        // Peak lag can be positive or negative depending on the
-        // reference convention used by the data source.
         super::validation::check_finite(
             self.peak_temperature_lag_hours,
             "peak_temperature_lag_hours",

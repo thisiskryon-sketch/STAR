@@ -141,7 +141,6 @@ pub fn load_geotiff(path: impl AsRef<Path>) -> Result<GeoTiffDem, String> {
         return Err("Invalid pixel scale".to_string());
     }
 
-    // This first implementation requires square, north-up pixels.
     let ratio = scale[0] / scale[1];
 
     if (ratio - 1.0).abs() > 0.01 {
@@ -157,7 +156,6 @@ pub fn load_geotiff(path: impl AsRef<Path>) -> Result<GeoTiffDem, String> {
     let pixel_size_y = scale[1] * unit_factor;
     let pixel_size_m = (pixel_size_x + pixel_size_y) / 2.0;
 
-    // Pixel-to-model origin from the first tiepoint.
     let origin_x = tiepoint[3] - tiepoint[0] * scale[0];
     let origin_y = tiepoint[4] + tiepoint[1] * scale[1];
 

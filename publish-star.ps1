@@ -1,5 +1,3 @@
-﻿# S.T.A.R. — validate, stage and publish the project to GitHub
-# Run from the repository root in PowerShell.
 $ErrorActionPreference = "Stop"
 
 $root = (Get-Location).Path
@@ -15,21 +13,18 @@ if (-not (Test-Path ".\.git")) {
     throw "This folder is not a Git repository."
 }
 
-# Install the prepared README.
 $readmeSource = Join-Path $PSScriptRoot "README.md"
 if (-not (Test-Path $readmeSource)) {
     throw "README.md from the release kit is missing."
 }
 if ((Resolve-Path $readmeSource).Path -ne (Join-Path $root "README.md")) { Copy-Item $readmeSource ".\README.md" -Force }
 
-# Append safe exclusions without replacing the existing .gitignore.
 $ignorePath = ".\.gitignore"
 if (-not (Test-Path $ignorePath)) {
     New-Item -ItemType File -Path $ignorePath | Out-Null
 }
 $ignoreText = @'
 
-# --- S.T.A.R. local/generated files ---
 /target/
 /backups/
 /_star_ui_package/
@@ -68,7 +63,6 @@ Write-Host "`n[4/5] Checking files before staging..." -ForegroundColor Yellow
 git remote -v
 git status --short
 
-# GitHub rejects individual files larger than 100 MB. Stop before staging them.
 $largeFiles = Get-ChildItem -Path . -Recurse -File -Force |
     Where-Object {
         $_.FullName -notmatch '\\(\.git|target|backups|_star_ui_package)\\' -and
@@ -79,7 +73,6 @@ if ($largeFiles) {
     throw "Files larger than 90 MB found. Keep large datasets/build artifacts out of Git or use Git LFS."
 }
 
-# Guard against accidentally committing common secrets.
 $secretFiles = @(".env", ".env.local", "id_rsa", "id_ed25519")
 foreach ($file in $secretFiles) {
     if (Test-Path $file) {
@@ -105,7 +98,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "git commit failed. If Git says there is nothing to commit, check git status."
 }
 
-# Ensure origin points to the intended repository.
 $origin = git remote get-url origin 2>$null
 if (-not $origin) {
     git remote add origin $remote

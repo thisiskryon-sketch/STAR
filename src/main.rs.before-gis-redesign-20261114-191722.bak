@@ -188,7 +188,6 @@ impl StarApp {
         let ny = ny / length;
         let nz = nz / length;
 
-        // Northwest illumination, 45-degree sun altitude.
         let azimuth = 315.0_f64.to_radians();
         let altitude = 45.0_f64.to_radians();
 
@@ -207,7 +206,6 @@ impl StarApp {
             return;
         };
 
-        // Preserve the real raster aspect ratio.
         let available_width = ui.available_width().max(320.0);
         let max_height = 620.0_f32;
 
@@ -221,7 +219,6 @@ impl StarApp {
 
         painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(8, 13, 20));
 
-        // Higher sampling density than the previous 180-cell renderer.
         let stride = (grid.width.max(grid.height) / 480).max(1);
 
         let cols = grid.width.div_ceil(stride);
