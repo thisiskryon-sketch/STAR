@@ -94,7 +94,7 @@ The v0.6.2 mission-discovery engine is included in `algorithm/star-core` and is 
 
 ### Data needed for a real campaign
 
-The repository does not contain a complete Earth-to-Moon campaign dataset. A real campaign needs source DEMs for the selected lunar sites and terrestrial analogs, projected to a suitable metric CRS and a common 30 m scale, with at least 3 km of surrounding terrain for the low-sun calculation. Each source must include its citation, processing details and verified uncertainty in the import manifest. One NASA LOLA DEM for lunar Site01 is documented in [data/moon/README.md](data/moon/README.md), but the raster itself is excluded from Git because of its size. Until the remaining source data and uncertainties are supplied, demo runs illustrate the workflow and do not validate scientific conclusions.
+Source DEMs for all six lunar targets and six Earth regions have been downloaded and prepared locally at a common 30 m scale, with surrounding terrain for low-sun calculations. Large source and prepared GeoTIFFs are excluded from Git; [data/README.md](data/README.md) explains how to fetch and prepare them. The high-latitude Haughton region uses Copernicus GLO-30 because NASADEM does not cover that latitude and ASTER downloads require Earthdata access. Product-level uncertainties and citations are recorded in the data notes and preparation metadata. These inputs enable real-data processing, but the scientific assessment still needs verification and transfer evidence; synthetic demo files are not scientific results.
 
 ## Working with elevation data
 

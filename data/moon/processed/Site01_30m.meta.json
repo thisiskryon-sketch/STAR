@@ -1,0 +1,23 @@
+{
+  "schema_version": "star-prep-1",
+  "created_utc": "2026-11-15T20:43:26+00:00",
+  "body": "moon",
+  "region": "Site01",
+  "dem": "NASA PGDA LOLA Product 78 Site01",
+  "inputs": [
+    "data/moon/Site01_final_adj_5mpp_surf.tif"
+  ],
+  "output": "data/moon/processed/Site01_30m.tif",
+  "target_srs": "+proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +x_0=0 +y_0=0 +R=1737400 +units=m +no_defs",
+  "resolution_m": 30.0,
+  "resample": "average",
+  "bbox_lonlat": null,
+  "nodata": -9999.0,
+  "size_px": [
+    534,
+    534
+  ],
+  "valid_cells": 285156,
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "star-prep-1",
+  "created_utc": "2026-11-15T20:43:38+00:00",
+  "body": "earth",
+  "region": "Tolbachik_Kamchatka",
+  "dem": "NASADEM v001, OpenTopography public mirror",
+  "inputs": [
+    "data/earth/raw/NASADEM_HGT_n55e160.tif"
+  ],
+  "output": "data/earth/processed/Tolbachik_Kamchatka_30m.tif",
+  "target_srs": "EPSG:32657",
+  "resolution_m": 30.0,
+  "resample": "average",
+  "bbox_lonlat": [
+    160.24,
+    55.72,
+    160.36,
+    55.88
+  ],
+  "nodata": -9999.0,
+  "size_px": [
+    263,
+    600
+  ],
+  "valid_cells": 157800,
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2"
+}

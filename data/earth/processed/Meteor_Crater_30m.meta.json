@@ -1,0 +1,31 @@
+{
+  "schema_version": "star-prep-1",
+  "created_utc": "2026-11-15T20:43:35+00:00",
+  "body": "earth",
+  "region": "Meteor_Crater",
+  "dem": "NASADEM v001, OpenTopography public mirror",
+  "inputs": [
+    "data/earth/raw/NASADEM_HGT_n35w112.tif",
+    "data/earth/raw/NASADEM_HGT_n35w111.tif",
+    "data/earth/raw/NASADEM_HGT_n34w112.tif",
+    "data/earth/raw/NASADEM_HGT_n34w111.tif"
+  ],
+  "output": "data/earth/processed/Meteor_Crater_30m.tif",
+  "target_srs": "EPSG:32612",
+  "resolution_m": 30.0,
+  "resample": "average",
+  "bbox_lonlat": [
+    -111.12,
+    34.95,
+    -110.92,
+    35.11
+  ],
+  "nodata": -9999.0,
+  "size_px": [
+    610,
+    593
+  ],
+  "valid_cells": 361730,
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2"
+}

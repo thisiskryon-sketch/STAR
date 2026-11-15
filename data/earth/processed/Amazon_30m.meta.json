@@ -1,0 +1,31 @@
+{
+  "schema_version": "star-prep-1",
+  "created_utc": "2026-11-15T20:43:39+00:00",
+  "body": "earth",
+  "region": "Amazon",
+  "dem": "NASADEM v001, OpenTopography public mirror",
+  "inputs": [
+    "data/earth/raw/NASADEM_HGT_s03w061.tif",
+    "data/earth/raw/NASADEM_HGT_s03w060.tif",
+    "data/earth/raw/NASADEM_HGT_s04w061.tif",
+    "data/earth/raw/NASADEM_HGT_s04w060.tif"
+  ],
+  "output": "data/earth/processed/Amazon_30m.tif",
+  "target_srs": "EPSG:32721",
+  "resolution_m": 30.0,
+  "resample": "average",
+  "bbox_lonlat": [
+    -60.12,
+    -3.12,
+    -59.88,
+    -2.88
+  ],
+  "nodata": -9999.0,
+  "size_px": [
+    894,
+    889
+  ],
+  "valid_cells": 794766,
+  "rasterio": "1.5.2",
+  "gdal": "3.12.2"
+}

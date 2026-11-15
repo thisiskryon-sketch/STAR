@@ -51,8 +51,8 @@
     },
     {
       "file": "earth_haughton.json",
-      "vertical_uncertainty_m": 17.0,
-      "source_version": "ASTER GDEM v003 tile ASTGTMV003_N75W090 (doi:10.5067/ASTER/ASTGTM.003), UTM 30 m",
+      "vertical_uncertainty_m": 4.0,
+      "source_version": "Copernicus DEM GLO-30 tile Copernicus_DSM_COG_10_N75_00_W090_00_DEM, conservative product-level <4 m absolute vertical accuracy (90% linear error), UTM 30 m",
       "processing_version": "star_backend + lowsun patch (fill in commit hash)",
       "data_origin": "ExternalMeasured"
     }
