@@ -1052,11 +1052,7 @@ impl StarApp {
         });
     }
     fn map_view(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        let Some((gw, gh, path)) = self
-            .dem
-            .as_ref()
-            .map(|d| (d.grid.width, d.grid.height, d.path.display().to_string()))
-        else {
+        let Some((gw, gh)) = self.dem.as_ref().map(|d| (d.grid.width, d.grid.height)) else {
             ui.centered_and_justified(|ui| {
                 ui.vertical_centered(|ui| {
                     ui.heading("S.T.A.R. Terrain Workspace");
@@ -1077,9 +1073,9 @@ impl StarApp {
         let Some(tex) = self.texture.clone() else {
             return;
         };
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.label(
-                egui::RichText::new(format!("{}  /  {}", path, self.layer.label()))
+                egui::RichText::new(format!("{}  ·  {} × {}", self.layer.label(), gw, gh))
                     .size(10.)
                     .color(MUTED),
             );
