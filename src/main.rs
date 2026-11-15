@@ -315,6 +315,21 @@ impl StarApp {
         };
         Some((slope, shade, rough, lap))
     }
+    fn sample_relief(g: &RasterGrid, x: usize, y: usize) -> Option<(f64, f64, f64)> {
+        let z = g.get(x, y)?;
+        let dx = g.cell_size_m.max(0.001);
+        let l = g.get(x.saturating_sub(1), y).unwrap_or(z);
+        let r = g.get((x + 1).min(g.width - 1), y).unwrap_or(z);
+        let u = g.get(x, y.saturating_sub(1)).unwrap_or(z);
+        let d = g.get(x, (y + 1).min(g.height - 1)).unwrap_or(z);
+        let gx = (r - l) / (2.0 * dx);
+        let gy = (d - u) / (2.0 * dx);
+        let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
+        let shade =
+            (0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15);
+        let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
+        Some((slope, shade, lap))
+    }
     fn build_texture(&mut self, ctx: &egui::Context) {
         if self.texture.is_some() && self.texture_layer == Some(self.layer) {
             return;
@@ -327,7 +342,9 @@ impl StarApp {
         let Some((min, max)) = g.min_max() else {
             return;
         };
-        let scale = (g.width.max(g.height) as f64 / 1400.0).max(1.0);
+        // Keep texture generation responsive for large GeoTIFFs. At 900px the
+        // displayed map remains detailed while each layer needs less CPU and VRAM.
+        let scale = (g.width.max(g.height) as f64 / 900.0).max(1.0);
         let w = ((g.width as f64 / scale).ceil() as usize).max(1);
         let h = ((g.height as f64 / scale).ceil() as usize).max(1);
         let mut pixels = Vec::with_capacity(w * h);
@@ -356,7 +373,7 @@ impl StarApp {
                     Layer::Elevation => Self::elevation_color(t),
                     Layer::Hillshade => {
                         let base = Self::elevation_color(t);
-                        let sh = Self::sample_metric(g, x, y)
+                        let sh = Self::sample_relief(g, x, y)
                             .map(|m| m.1 as f32)
                             .unwrap_or(0.5);
                         egui::Color32::from_rgb(
@@ -388,7 +405,7 @@ impl StarApp {
                         ],
                     ),
                     Layer::Curvature => {
-                        let c = Self::sample_metric(g, x, y).map(|m| m.3).unwrap_or(0.0);
+                        let c = Self::sample_relief(g, x, y).map(|m| m.2).unwrap_or(0.0);
                         let q = (c * 10000.0).tanh();
                         if q >= 0.0 {
                             egui::Color32::from_rgb(
@@ -1297,7 +1314,6 @@ impl eframe::App for StarApp {
                     });
                 });
             });
-        ctx.request_repaint_after(std::time::Duration::from_millis(33));
     }
 }
 fn main() -> eframe::Result<()> {
