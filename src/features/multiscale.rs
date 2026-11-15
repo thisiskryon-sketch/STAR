@@ -1,53 +1,28 @@
-//! Мультимасштабные признаки рельефа (ТЗ, раздел 6).
-//!
-//! Один и тот же код считает тайлы Земли и Луны. Масштаб задаётся
-//! множителем k (1, 3, 9) рабочего размера пикселя: база = k * cell_size_m.
-//!
-//! Определения (зафиксировать в ТЗ, чтобы Земля и Луна считались одинаково):
-//! * RMS-уклон на базе k: для каждой ячейки tan(θ) = hypot(dz/dx, dz/dy),
-//!   где производные берутся центральной разностью с шагом k пикселей:
-//!   dz/dx = (z[x+k] - z[x-k]) / (2*k*cell). Затем
-//!   rms_slope_deg = atan( sqrt( mean(tan²θ) ) ) в градусах.
-//! * RMS-шероховатость на базе k: для каждой ячейки отклонение высоты от
-//!   среднего в окне (2k+1)×(2k+1); rms_roughness_m = sqrt(mean(отклонение²)).
-//!
-//! Ячейка участвует в расчёте, только если все пиксели, нужные для неё,
-//! валидны (NoData не заполняется и не интерполируется).
-
 use crate::preprocessing::dem::RasterGrid;
 
-/// Множители рабочего пикселя из ТЗ.
 pub const SCALES: [usize; 3] = [1, 3, 9];
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ScaleFeatures {
-    /// Множитель k (база = k * размер пикселя).
     pub scale: usize,
-    /// База в метрах.
     pub base_m: f64,
-    /// RMS-уклон, градусы. None, если не набралось ни одной ячейки.
     pub rms_slope_deg: Option<f64>,
-    /// RMS-шероховатость высот, метры.
     pub rms_roughness_m: Option<f64>,
-    /// Сколько ячеек тайла вошло в расчёт уклона / шероховатости.
     pub slope_cells: usize,
     pub roughness_cells: usize,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TileFeatures {
-    /// Левый верхний угол тайла и размер в пикселях.
     pub x0: usize,
     pub y0: usize,
     pub width: usize,
     pub height: usize,
     pub cell_size_m: f64,
-    /// Q: доля валидных пикселей внутри тайла (0..1).
     pub quality_q: f64,
     pub scales: Vec<ScaleFeatures>,
 }
 
-/// Окно тайла, обрезанное по границам растра.
 fn clip_tile(
     grid: &RasterGrid,
     x0: usize,
@@ -63,7 +38,6 @@ fn clip_tile(
     Some((x0, y0, w, h))
 }
 
-/// Q = доля валидных пикселей внутри тайла.
 pub fn tile_quality(grid: &RasterGrid, x0: usize, y0: usize, w: usize, h: usize) -> f64 {
     let Some((x0, y0, w, h)) = clip_tile(grid, x0, y0, w, h) else {
         return 0.0;
@@ -79,9 +53,6 @@ pub fn tile_quality(grid: &RasterGrid, x0: usize, y0: usize, w: usize, h: usize)
     valid as f64 / (w * h) as f64
 }
 
-/// Признаки одного масштаба по ячейкам внутри тайла.
-/// Соседние пиксели за границей тайла разрешено читать (контекст растра),
-/// но центральные ячейки берутся только внутри тайла.
 pub fn scale_features(
     grid: &RasterGrid,
     x0: usize,
@@ -112,7 +83,6 @@ pub fn scale_features(
 
     for y in y0..y0 + h {
         for x in x0..x0 + w {
-            // Уклон: центральная разность с шагом k.
             if x >= k && y >= k {
                 if let (Some(l), Some(r), Some(t), Some(b)) = (
                     grid.get(x - k, y),
@@ -127,7 +97,6 @@ pub fn scale_features(
                 }
             }
 
-            // Шероховатость: отклонение от среднего в окне (2k+1)².
             if x >= k && y >= k && x + k < grid.width && y + k < grid.height {
                 if let Some(center) = grid.get(x, y) {
                     let mut sum = 0.0;
@@ -168,7 +137,6 @@ pub fn scale_features(
     }
 }
 
-/// Все признаки тайла: Q и три масштаба.
 pub fn extract_tile_features(
     grid: &RasterGrid,
     x0: usize,
@@ -191,8 +159,6 @@ pub fn extract_tile_features(
     })
 }
 
-/// Сырая матрица высот тайла для модуля теней: (width, height, строки подряд).
-/// Невалидные пиксели отдаются как NaN, чтобы модуль теней их увидел.
 pub fn tile_heights(
     grid: &RasterGrid,
     x0: usize,
@@ -210,9 +176,6 @@ pub fn tile_heights(
     Some((w, h, out))
 }
 
-/// Режет растр на непересекающиеся тайлы size×size (края обрезаются) и
-/// считает признаки каждого. Тайлы с Q < q_min отбрасываются ДО расчёта
-/// (ТЗ: порог качества применяется до ранжирования).
 pub fn extract_all_tiles(grid: &RasterGrid, tile_px: usize, q_min: f64) -> Vec<TileFeatures> {
     let mut out = Vec::new();
     if tile_px == 0 {
@@ -282,7 +245,6 @@ mod tests {
 
     #[test]
     fn checkerboard_roughness_drops_with_scale_correctly() {
-        // Шахматка ±1 м: на k=1 окно 3×3 даёт ненулевую шероховатость.
         let mut z = Vec::new();
         for y in 0..30 {
             for x in 0..30 {

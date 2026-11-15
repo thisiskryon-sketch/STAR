@@ -137,7 +137,6 @@ pub fn calculate_curvature(grid: &RasterGrid, x: usize, y: usize) -> Option<f64>
     Some(d2x + d2y)
 }
 
-// Calculates a complete terrain fingerprint for one DEM cell.
 pub fn calculate_terrain_fingerprint(
     grid: &RasterGrid,
     x: usize,

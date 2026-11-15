@@ -10,19 +10,13 @@ use crate::features::multiscale::TileFeatures;
 
 pub const SCHEMA_VERSION: &str = "star-temp-0";
 
-/// Метаданные источника, общие для всех тайлов одного DEM.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceMeta {
-    /// "earth" или "moon".
     pub body: String,
-    /// Регион или район.
     pub region: String,
-    /// "known_analog", "negative_control", "candidate" или "target".
     pub role: String,
-    /// Название DEM.
     pub dem: String,
     pub epsg: u16,
-    /// Координаты левого верхнего угла растра в проективной системе.
     pub origin_x: f64,
     pub origin_y: f64,
 }
@@ -36,7 +30,6 @@ pub struct CellRecord {
     pub dem: String,
     pub epsg: u16,
 
-    /// Центр тайла в проективных координатах, метры.
     pub center_x: f64,
     pub center_y: f64,
 
@@ -52,7 +45,6 @@ pub struct CellRecord {
     pub rough_m_3x: Option<f64>,
     pub rough_m_9x: Option<f64>,
 
-    /// Доля тени при высоте Солнца 1°, 2°, 3°.
     pub shadow_1deg: Option<f64>,
     pub shadow_2deg: Option<f64>,
     pub shadow_3deg: Option<f64>,
@@ -89,7 +81,6 @@ fn validate_optional_metric(value: Option<f64>, name: &str, index: usize) -> Res
     Ok(())
 }
 
-/// Проверяет метаданные перед построением записей.
 pub fn validate_source_meta(meta: &SourceMeta) -> Result<(), String> {
     if meta.body.trim().is_empty() {
         return Err("Source body cannot be empty".into());
@@ -118,7 +109,6 @@ pub fn validate_source_meta(meta: &SourceMeta) -> Result<(), String> {
     Ok(())
 }
 
-/// Проверяет одну экспортируемую запись.
 fn validate_cell(cell: &CellRecord, index: usize) -> Result<(), String> {
     if cell.id.trim().is_empty() {
         return Err(format!("Cell {index}: empty ID"));
@@ -195,7 +185,6 @@ fn validate_cell(cell: &CellRecord, index: usize) -> Result<(), String> {
     Ok(())
 }
 
-/// Проверяет весь набор записей.
 pub fn validate_cells(cells: &[CellRecord]) -> Result<(), String> {
     let mut ids = HashSet::with_capacity(cells.len());
 
@@ -210,10 +199,6 @@ pub fn validate_cells(cells: &[CellRecord]) -> Result<(), String> {
     Ok(())
 }
 
-/// Превращает тайлы одного растра в записи cells.json.
-///
-/// Важно: геопривязка предполагает североориентированный растр
-/// без вращения. Для rotated GeoTIFF необходим affine transform.
 pub fn records_from_tiles(
     tiles: &[TileFeatures],
     meta: &SourceMeta,
@@ -284,10 +269,6 @@ fn temporary_path(path: &Path) -> PathBuf {
     path.with_file_name(name)
 }
 
-/// Сохраняет JSON через временный файл.
-///
-/// Это снижает риск повреждения предыдущего файла,
-/// если сериализация или запись завершится ошибкой.
 pub fn write_cells(path: &Path, cells: Vec<CellRecord>) -> Result<(), String> {
     validate_cells(&cells)?;
 
@@ -319,7 +300,6 @@ pub fn write_cells(path: &Path, cells: Vec<CellRecord>) -> Result<(), String> {
     Ok(())
 }
 
-/// Удобная функция полного экспорта.
 pub fn export_cells(
     path: &Path,
     tiles: &[TileFeatures],
@@ -337,7 +317,6 @@ pub fn export_cells(
     })
 }
 
-/// Читает и проверяет cells.json.
 pub fn read_cells(path: &Path) -> Result<CellsFile, String> {
     let text = fs::read_to_string(path).map_err(|e| format!("Cannot read cells file: {e}"))?;
 

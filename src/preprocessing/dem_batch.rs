@@ -2,7 +2,6 @@ use crate::features::terrain_fingerprint::calculate_terrain_fingerprint;
 use crate::models::terrain::TerrainFingerprint;
 use crate::preprocessing::dem::RasterGrid;
 
-/// One processed DEM cell and its terrain fingerprint.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TerrainSample {
     pub x: usize,
@@ -10,7 +9,6 @@ pub struct TerrainSample {
     pub fingerprint: TerrainFingerprint,
 }
 
-/// Results of processing an entire DEM raster.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TerrainExtractionReport {
     pub width: usize,
@@ -64,9 +62,6 @@ impl TerrainExtractionReport {
     }
 }
 
-/// Extracts terrain fingerprints from every eligible DEM cell.
-///
-/// Cells without enough surrounding terrain are skipped.
 pub fn extract_terrain_batch(
     grid: &RasterGrid,
     radius_cells: usize,

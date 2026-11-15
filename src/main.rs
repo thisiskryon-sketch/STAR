@@ -6,12 +6,12 @@ use star_backend::preprocessing::dem_batch::{TerrainExtractionReport, extract_te
 use star_backend::preprocessing::geotiff::{GeoTiffDem, load_geotiff};
 use std::f64::consts::PI;
 
-const BG: egui::Color32 = egui::Color32::from_rgb(5, 16, 28);
-const PANEL: egui::Color32 = egui::Color32::from_rgb(7, 23, 38);
-const PANEL_2: egui::Color32 = egui::Color32::from_rgb(12, 31, 48);
-const LINE: egui::Color32 = egui::Color32::from_rgb(28, 53, 72);
-const MUTED: egui::Color32 = egui::Color32::from_rgb(139, 161, 180);
-const GREEN: egui::Color32 = egui::Color32::from_rgb(126, 198, 111);
+const BG: egui::Color32 = egui::Color32::from_rgb(24, 27, 26);
+const PANEL: egui::Color32 = egui::Color32::from_rgb(31, 35, 33);
+const PANEL_2: egui::Color32 = egui::Color32::from_rgb(40, 45, 42);
+const LINE: egui::Color32 = egui::Color32::from_rgb(58, 65, 60);
+const MUTED: egui::Color32 = egui::Color32::from_rgb(164, 172, 166);
+const GREEN: egui::Color32 = egui::Color32::from_rgb(166, 185, 132);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Page {
@@ -65,7 +65,6 @@ struct StarApp {
     pan: egui::Vec2,
     show_grid: bool,
 
-    // Fingerprint export configuration
     export_body: String,
     export_region: String,
     export_role: String,
@@ -342,8 +341,6 @@ impl StarApp {
         let Some((min, max)) = g.min_max() else {
             return;
         };
-        // Keep texture generation responsive for large GeoTIFFs. At 900px the
-        // displayed map remains detailed while each layer needs less CPU and VRAM.
         let scale = (g.width.max(g.height) as f64 / 900.0).max(1.0);
         let w = ((g.width as f64 / scale).ceil() as usize).max(1);
         let h = ((g.height as f64 / scale).ceil() as usize).max(1);
@@ -1211,8 +1208,6 @@ impl eframe::App for StarApp {
                 let panel_height = ui.available_height();
                 let map_width = (ui.available_width() - 591.0).max(180.0);
                 ui.horizontal(|ui| {
-                    // Project tools and export controls stay in the same workspace;
-                    // the export group can be collapsed to keep short screens usable.
                     ui.allocate_ui_with_layout(egui::vec2(315.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
                         egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
                             Self::panel_frame(ui, |ui| {
@@ -1319,7 +1314,7 @@ impl eframe::App for StarApp {
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("S.T.A.R. — Geospatial Intelligence")
+            .with_title("S.T.A.R. | Terrain Workbench")
             .with_inner_size([1600., 1000.])
             .with_min_inner_size([1100., 720.]),
         ..Default::default()
@@ -1333,12 +1328,12 @@ fn main() -> eframe::Result<()> {
             v.window_fill = PANEL;
             v.extreme_bg_color = BG;
             v.faint_bg_color = PANEL_2;
-            v.selection.bg_fill = egui::Color32::from_rgb(29, 91, 79);
+            v.selection.bg_fill = egui::Color32::from_rgb(57, 70, 52);
             v.selection.stroke = egui::Stroke::new(1_f32, GREEN);
             v.widgets.noninteractive.bg_fill = PANEL;
             v.widgets.inactive.bg_fill = PANEL_2;
-            v.widgets.hovered.bg_fill = egui::Color32::from_rgb(23, 57, 72);
-            v.widgets.active.bg_fill = egui::Color32::from_rgb(31, 105, 85);
+            v.widgets.hovered.bg_fill = egui::Color32::from_rgb(51, 59, 49);
+            v.widgets.active.bg_fill = egui::Color32::from_rgb(67, 81, 58);
             cc.egui_ctx.set_visuals(v);
             let mut s = (*cc.egui_ctx.style()).clone();
             s.spacing.item_spacing = egui::vec2(8., 7.);
