@@ -2,7 +2,7 @@
 
 # S.T.A.R.
 
-### Spatio-Temporal & Physical Analog Discovery
+### Scientific Terrain Analysis and Recognition
 
 **A Rust-based scientific desktop application for terrain analysis and planetary surface analog research.**
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-S.T.A.R. (Spatio-Temporal & Physical Analog Discovery) is a native desktop research prototype designed to explore how terrestrial landscapes can be characterized and compared with candidate locations on the Moon and Mars.
+S.T.A.R. (Scientific Terrain Analysis and Recognition) is a native desktop research prototype designed to explore how terrestrial landscapes can be characterized and compared with candidate locations on the Moon and Mars.
 
 The current implementation focuses on **digital elevation model (DEM) ingestion and terrain-feature extraction**. It provides a foundation for a broader workflow in which terrain morphology and, as the project evolves, thermal and environmental signatures can support the search for planetary surface analogs.
 
@@ -189,6 +189,6 @@ No license has been declared yet. Until a license is added to this repository, a
 
 <div align="center">
 
-**S.T.A.R. — exploring terrestrial analogs for planetary exploration.**
+**S.T.A.R. — Scientific Terrain Analysis and Recognition.**
 
 </div>
