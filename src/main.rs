@@ -1249,7 +1249,7 @@ impl eframe::App for StarApp {
                 ui.separator();
 
                 let panel_height = ui.available_height();
-                let map_width = (ui.available_width() - 591.0).max(180.0);
+                let map_width = (ui.available_width() - 607.0).max(120.0);
                 ui.horizontal(|ui| {
                     ui.allocate_ui_with_layout(egui::vec2(315.0, panel_height), egui::Layout::top_down(egui::Align::Min), |ui| {
                         egui::Frame::new().fill(PANEL).stroke(egui::Stroke::new(1_f32, LINE)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
@@ -1333,7 +1333,7 @@ impl eframe::App for StarApp {
                             ui.add_space(7.0);
                             Self::panel_frame(ui, |ui| {
                                 ui.label(egui::RichText::new("MAP CONTROLS").strong().color(GREEN));
-                                ui.horizontal(|ui| {
+                                ui.horizontal_wrapped(|ui| {
                                     if ui.button("Zoom +").clicked() { self.zoom = (self.zoom * 1.25).clamp(0.35, 8.0); }
                                     if ui.button("Zoom -").clicked() { self.zoom = (self.zoom / 1.25).clamp(0.35, 8.0); }
                                     if ui.button("Reset").clicked() { self.zoom = 1.0; self.pan = egui::Vec2::ZERO; }
@@ -1345,7 +1345,7 @@ impl eframe::App for StarApp {
                             Self::panel_frame(ui, |ui| {
                                 ui.label(egui::RichText::new("ANALYSIS STATUS").strong().color(GREEN));
                                 if self.analysis_running {
-                                    ui.horizontal(|ui| { ui.spinner(); ui.label("Calculating terrain fingerprints…"); });
+                                    ui.horizontal_wrapped(|ui| { ui.spinner(); ui.label("Calculating terrain fingerprints…"); });
                                 } else if let Some(report) = &self.report { ui.label(format!("{} fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0)); }
                                 else { ui.label("Run terrain analysis to see results."); }
                                 if let Some(error) = &self.error { ui.colored_label(egui::Color32::LIGHT_RED, error); }
