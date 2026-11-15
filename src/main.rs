@@ -5,6 +5,8 @@ use star_backend::preprocessing::dem::RasterGrid;
 use star_backend::preprocessing::dem_batch::{TerrainExtractionReport, extract_terrain_batch};
 use star_backend::preprocessing::geotiff::{GeoTiffDem, load_geotiff};
 use std::f64::consts::PI;
+use std::sync::Arc;
+use std::sync::mpsc::{self, Receiver, TryRecvError};
 
 const BG: egui::Color32 = egui::Color32::from_rgb(24, 27, 26);
 const PANEL: egui::Color32 = egui::Color32::from_rgb(31, 35, 33);
@@ -52,9 +54,11 @@ struct StarApp {
     page: Page,
     radius: usize,
 
-    dem: Option<GeoTiffDem>,
+    dem: Option<Arc<GeoTiffDem>>,
     report: Option<TerrainExtractionReport>,
     error: Option<String>,
+    analysis_rx: Option<Receiver<Result<TerrainExtractionReport, String>>>,
+    analysis_running: bool,
 
     layer: Layer,
     texture: Option<egui::TextureHandle>,
@@ -83,6 +87,8 @@ impl Default for StarApp {
             dem: None,
             report: None,
             error: None,
+            analysis_rx: None,
+            analysis_running: false,
 
             layer: Layer::Hillshade,
             texture: None,
@@ -113,7 +119,7 @@ impl StarApp {
             self.report = None;
             match load_geotiff(&path) {
                 Ok(dem) => {
-                    self.dem = Some(dem);
+                    self.dem = Some(Arc::new(dem));
                     self.invalidate_map();
                 }
                 Err(e) => self.error = Some(e),
@@ -140,7 +146,7 @@ impl StarApp {
         }
         match RasterGrid::new(w, h, 30.0, z) {
             Ok(grid) => {
-                self.dem = Some(GeoTiffDem {
+                self.dem = Some(Arc::new(GeoTiffDem {
                     grid,
                     path: "synthetic_demo_dem".into(),
                     epsg: 32767,
@@ -149,7 +155,7 @@ impl StarApp {
                     origin_y: 0.0,
                     pixel_size_m: 30.0,
                     nodata: None,
-                });
+                }));
                 self.report = None;
                 self.error = None;
                 self.invalidate_map();
@@ -157,16 +163,48 @@ impl StarApp {
             Err(e) => self.error = Some(e),
         }
     }
-    fn run_analysis(&mut self) {
+    fn run_analysis(&mut self, ctx: &egui::Context) {
+        if self.analysis_running {
+            return;
+        }
         self.error = None;
         self.report = None;
         let Some(dem) = &self.dem else {
             self.error = Some("Load a DEM before running analysis.".into());
             return;
         };
-        match extract_terrain_batch(&dem.grid, self.radius) {
-            Ok(r) => self.report = Some(r),
-            Err(e) => self.error = Some(e),
+        let dem = Arc::clone(dem);
+        let radius = self.radius;
+        let (tx, rx) = mpsc::channel();
+        let repaint_ctx = ctx.clone();
+        match std::thread::Builder::new()
+            .name("star-terrain-analysis".into())
+            .spawn(move || {
+                let result = extract_terrain_batch(&dem.grid, radius);
+                let _ = tx.send(result);
+                repaint_ctx.request_repaint();
+            }) {
+            Ok(_) => {
+                self.analysis_rx = Some(rx);
+                self.analysis_running = true;
+            }
+            Err(error) => self.error = Some(format!("Could not start analysis: {error}")),
+        }
+    }
+    fn poll_analysis(&mut self) {
+        let result = match self.analysis_rx.as_ref().map(Receiver::try_recv) {
+            Some(Ok(result)) => Some(Some(result)),
+            Some(Err(TryRecvError::Disconnected)) => Some(None),
+            Some(Err(TryRecvError::Empty)) | None => None,
+        };
+        if let Some(result) = result {
+            self.analysis_running = false;
+            self.analysis_rx = None;
+            match result {
+                Some(Ok(report)) => self.report = Some(report),
+                Some(Err(error)) => self.error = Some(error),
+                None => self.error = Some("Terrain analysis stopped unexpectedly.".into()),
+            }
         }
     }
     fn export_fingerprints(&mut self) {
@@ -669,7 +707,7 @@ impl StarApp {
                                 self.generate_demo();
                             }
                             if ui.button("▶  Run terrain analysis").clicked() {
-                                self.run_analysis();
+                                self.run_analysis(ctx);
                             }
                             ui.horizontal(|ui| {
                                 ui.label(
@@ -1188,6 +1226,10 @@ impl StarApp {
 
 impl eframe::App for StarApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.poll_analysis();
+        if self.analysis_running {
+            ctx.request_repaint_after(std::time::Duration::from_millis(100));
+        }
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(BG).inner_margin(egui::Margin::same(8)))
             .show(ctx, |ui| {
@@ -1198,9 +1240,10 @@ impl eframe::App for StarApp {
                     ui.selectable_value(&mut self.page, Page::Terrain, "Terrain Analysis");
                     ui.selectable_value(&mut self.page, Page::Discovery, "Analog Discovery");
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.button("Load GeoTIFF").clicked() { self.load_file(); }
-                        if ui.button("Generate demo").clicked() { self.generate_demo(); }
-                        if ui.add_enabled(self.dem.is_some(), egui::Button::new("Run analysis")).clicked() { self.run_analysis(); }
+                        if ui.add_enabled(!self.analysis_running, egui::Button::new("Load GeoTIFF")).clicked() { self.load_file(); }
+                        if ui.add_enabled(!self.analysis_running, egui::Button::new("Generate demo")).clicked() { self.generate_demo(); }
+                        let run_label = if self.analysis_running { "Analyzing…" } else { "Run analysis" };
+                        if ui.add_enabled(self.dem.is_some() && !self.analysis_running, egui::Button::new(run_label)).clicked() { self.run_analysis(ctx); }
                     });
                 });
                 ui.separator();
@@ -1226,11 +1269,12 @@ impl eframe::App for StarApp {
                                     ui.selectable_value(&mut self.layer, layer, layer.label());
                                 }
                                 ui.horizontal(|ui| {
-                                    if ui.button("Load DEM").clicked() { self.load_file(); }
-                                    if ui.button("Demo").clicked() { self.generate_demo(); }
+                                    if ui.add_enabled(!self.analysis_running, egui::Button::new("Load DEM")).clicked() { self.load_file(); }
+                                    if ui.add_enabled(!self.analysis_running, egui::Button::new("Demo")).clicked() { self.generate_demo(); }
                                 });
-                                if ui.button("Run terrain analysis").clicked() { self.run_analysis(); }
-                                ui.add(egui::Slider::new(&mut self.radius, 1..=8).text("Radius (px)"));
+                                let run_label = if self.analysis_running { "Analyzing terrain…" } else { "Run terrain analysis" };
+                                if ui.add_enabled(self.dem.is_some() && !self.analysis_running, egui::Button::new(run_label)).clicked() { self.run_analysis(ctx); }
+                                ui.add(egui::Slider::new(&mut self.radius, 1..=8).text("Neighborhood radius (pixels)"));
                             });
                             ui.add_space(7.0);
                             egui::CollapsingHeader::new("Elevation profile").default_open(false).show(ui, |ui| {
@@ -1300,7 +1344,9 @@ impl eframe::App for StarApp {
                             ui.add_space(7.0);
                             Self::panel_frame(ui, |ui| {
                                 ui.label(egui::RichText::new("ANALYSIS STATUS").strong().color(GREEN));
-                                if let Some(report) = &self.report { ui.label(format!("{} fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0)); }
+                                if self.analysis_running {
+                                    ui.horizontal(|ui| { ui.spinner(); ui.label("Calculating terrain fingerprints…"); });
+                                } else if let Some(report) = &self.report { ui.label(format!("{} fingerprints | {:.1}% coverage", report.processed_cells(), report.coverage_fraction() * 100.0)); }
                                 else { ui.label("Run terrain analysis to see results."); }
                                 if let Some(error) = &self.error { ui.colored_label(egui::Color32::LIGHT_RED, error); }
                                 if let Some(status) = &self.export_status { ui.label(status); }
