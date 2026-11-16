@@ -56,6 +56,8 @@ struct StarApp {
     radius: usize,
     dem: Option<GeoTiffDem>,
     report: Option<TerrainExtractionReport>,
+    analysis_rx: Option<Receiver<Result<TerrainExtractionReport, String>>>,
+    analysis_running: bool,
     error: Option<String>,
     layer: Layer,
     texture: Option<egui::TextureHandle>,
@@ -91,6 +93,8 @@ impl Default for StarApp {
             radius: 2,
             dem: None,
             report: None,
+            analysis_rx: None,
+            analysis_running: false,
             error: None,
             layer: Layer::Hillshade,
             texture: None,
@@ -123,6 +127,10 @@ impl Default for StarApp {
 }
 impl StarApp {
     fn load_file(&mut self) {
+        if self.analysis_running {
+            self.error = Some("Wait for terrain analysis to finish before loading another DEM.".into());
+            return;
+        }
         if let Some(path) = rfd::FileDialog::new()
             .add_filter("GeoTIFF DEM", &["tif", "tiff"])
             .pick_file()
@@ -144,6 +152,10 @@ impl StarApp {
         self.selected = None;
     }
     fn generate_demo(&mut self) {
+        if self.analysis_running {
+            self.error = Some("Wait for terrain analysis to finish before replacing the DEM.".into());
+            return;
+        }
         let (w, h) = (420usize, 300usize);
         let mut z = Vec::with_capacity(w * h);
         for y in 0..h {
@@ -182,9 +194,41 @@ impl StarApp {
             self.error = Some("Load a DEM before running analysis.".into());
             return;
         };
-        match extract_terrain_batch(&dem.grid, self.radius) {
-            Ok(r) => self.report = Some(r),
-            Err(e) => self.error = Some(e),
+        if self.analysis_running {
+            return;
+        }
+        let grid = dem.grid.clone();
+        let radius = self.radius;
+        let (tx, rx) = mpsc::channel();
+        match thread::Builder::new().name("star-terrain-analysis".into()).spawn(move || {
+            let _ = tx.send(extract_terrain_batch(&grid, radius));
+        }) {
+            Ok(_) => {
+                self.analysis_rx = Some(rx);
+                self.analysis_running = true;
+            }
+            Err(error) => self.error = Some(format!("Could not start terrain analysis: {error}")),
+        }
+    }
+    fn poll_analysis(&mut self) {
+        let Some(rx) = &self.analysis_rx else { return };
+        match rx.try_recv() {
+            Ok(Ok(report)) => {
+                self.report = Some(report);
+                self.analysis_rx = None;
+                self.analysis_running = false;
+            }
+            Ok(Err(error)) => {
+                self.error = Some(error);
+                self.analysis_rx = None;
+                self.analysis_running = false;
+            }
+            Err(TryRecvError::Disconnected) => {
+                self.error = Some("Terrain analysis stopped unexpectedly.".into());
+                self.analysis_rx = None;
+                self.analysis_running = false;
+            }
+            Err(TryRecvError::Empty) => {}
         }
     }
     fn choose_discovery_data(&mut self) {
@@ -444,7 +488,7 @@ impl StarApp {
         let gy = (d - u) / (2.0 * dx);
         let slope = (gx * gx + gy * gy).sqrt().atan().to_degrees();
         let shade =
-            ((0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15));
+            (0.48 + 0.72 * ((-gx * 0.5) + (-gy * 0.5) + 0.707).max(0.0) / 1.7).clamp(0.35, 1.15);
         let lap = (l + r + u + d - 4.0 * z) / (dx * dx);
         let mut sum = 0.0;
         let mut sum2 = 0.0;
@@ -570,15 +614,15 @@ impl StarApp {
         self.texture_layer = Some(self.layer);
     }
     fn panel_frame<R>(ui: &mut egui::Ui, add: impl FnOnce(&mut egui::Ui) -> R) -> R {
-        egui::Frame::none()
+        egui::Frame::NONE
             .fill(PANEL)
-            .stroke(egui::Stroke::new(1.0, LINE))
+            .stroke(egui::Stroke::new(1.0_f32, LINE))
             .inner_margin(egui::Margin::same(13))
             .show(ui, add)
             .inner
     }
     fn metric_tile(ui: &mut egui::Ui, label: &str, value: String, unit: &str) {
-        egui::Frame::none()
+        egui::Frame::NONE
             .fill(PANEL_2)
             .inner_margin(egui::Margin::same(10))
             .show(ui, |ui| {
@@ -600,9 +644,9 @@ impl StarApp {
         egui::TopBottomPanel::top("star-topbar")
             .exact_height(58.)
             .frame(
-                egui::Frame::none()
+                egui::Frame::NONE
                     .fill(BG)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1.0_f32, LINE)),
             )
             .show(ctx, |ui| {
                 ui.horizontal_centered(|ui| {
@@ -659,9 +703,9 @@ impl StarApp {
             .default_width(315.)
             .width_range(275.0..=390.0)
             .frame(
-                egui::Frame::none()
+                egui::Frame::NONE
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1.0_f32, LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical()
@@ -731,7 +775,7 @@ impl StarApp {
                             ui.add_space(6.);
                             for layer in Layer::all() {
                                 let active = self.layer == layer;
-                                let (color, desc) = match layer {
+                                let (_, desc) = match layer {
                                     Layer::Elevation => {
                                         (egui::Color32::from_rgb(209, 165, 67), "DEM")
                                     }
@@ -804,8 +848,25 @@ impl StarApp {
                             if ui.button("◈  Generate demo terrain").clicked() {
                                 self.generate_demo();
                             }
-                            if ui.button("▶  Run terrain analysis").clicked() {
+                            if ui.add_enabled(!self.analysis_running, egui::Button::new(if self.analysis_running { "⏳  Analyzing terrain…" } else { "▶  Run terrain analysis" })).clicked() {
                                 self.run_analysis();
+                            }
+                            if self.analysis_running {
+                                ui.label(egui::RichText::new("Processing raster in background; the app remains responsive.").size(9.).color(MUTED));
+                            }
+                            if let Some(error) = &self.error {
+                                ui.colored_label(egui::Color32::LIGHT_RED, error);
+                            }
+                            if let Some(report) = &self.report {
+                                ui.separator();
+                                ui.label(egui::RichText::new("ANALYSIS COMPLETE").strong().size(10.).color(GREEN));
+                                Self::detail(ui, "Valid samples", format!("{} / {}", report.processed_cells(), report.total_cells()));
+                                Self::detail(ui, "Coverage", format!("{:.1}%", report.coverage_fraction() * 100.));
+                                Self::detail(ui, "Skipped cells", report.skipped_cells.to_string());
+                                if let Some(mean) = report.mean_elevation_m() {
+                                    Self::detail(ui, "Mean elevation", format!("{mean:.1} m"));
+                                }
+                                ui.label(egui::RichText::new(format!("Raster: {} × {} px · neighborhood: {} px", report.width, report.height, report.radius_cells)).size(9.).color(MUTED));
                             }
                             ui.horizontal(|ui| {
                                 ui.label(
@@ -843,9 +904,6 @@ impl StarApp {
                             if let Some(status) = &self.export_status {
                                 ui.label(egui::RichText::new(status).size(9.).color(GREEN));
                             }
-                            if let Some(e) = &self.error {
-                                ui.colored_label(egui::Color32::LIGHT_RED, e);
-                            }
                         });
                     });
             });
@@ -868,7 +926,7 @@ impl StarApp {
                     egui::pos2(rect.left() + 5., y),
                     egui::pos2(rect.right() - 5., y),
                 ],
-                egui::Stroke::new(1., LINE),
+                egui::Stroke::new(1.0_f32, LINE),
             );
         }
         let pts: Vec<_> = vals
@@ -883,7 +941,7 @@ impl StarApp {
                 )
             })
             .collect();
-        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8, GREEN)));
+        p.add(egui::Shape::line(pts, egui::Stroke::new(1.8_f32, GREEN)));
         p.text(
             rect.left_top() + egui::vec2(7., 5.),
             egui::Align2::LEFT_TOP,
@@ -905,9 +963,9 @@ impl StarApp {
             .default_width(260.)
             .width_range(230.0..=330.0)
             .frame(
-                egui::Frame::none()
+                egui::Frame::NONE
                     .fill(PANEL)
-                    .stroke(egui::Stroke::new(1., LINE)),
+                    .stroke(egui::Stroke::new(1.0_f32, LINE)),
             )
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
@@ -1154,35 +1212,35 @@ impl StarApp {
                         egui::pos2(x, map_rect.top()),
                         egui::pos2(x, map_rect.bottom()),
                     ],
-                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
                 );
                 painter.line_segment(
                     [
                         egui::pos2(map_rect.left(), y),
                         egui::pos2(map_rect.right(), y),
                     ],
-                    egui::Stroke::new(0.7, egui::Color32::from_white_alpha(55)),
+                    egui::Stroke::new(0.7_f32, egui::Color32::from_white_alpha(55)),
                 );
             }
         }
         painter.rect_stroke(
             map_rect,
             2.,
-            egui::Stroke::new(1., egui::Color32::from_rgb(91, 126, 137)),
+            egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(91, 126, 137)),
             egui::StrokeKind::Inside,
         );
         if let Some((x, y)) = self.selected {
             let px = map_rect.left() + map_rect.width() * x as f32 / gw as f32;
             let py = map_rect.top() + map_rect.height() * y as f32 / gh as f32;
             let pos = egui::pos2(px, py);
-            painter.circle_stroke(pos, 8., egui::Stroke::new(2., egui::Color32::WHITE));
+            painter.circle_stroke(pos, 8., egui::Stroke::new(2.0_f32, egui::Color32::WHITE));
             painter.line_segment(
                 [pos - egui::vec2(13., 0.), pos + egui::vec2(13., 0.)],
-                egui::Stroke::new(1., egui::Color32::WHITE),
+                egui::Stroke::new(1.0_f32, egui::Color32::WHITE),
             );
             painter.line_segment(
                 [pos - egui::vec2(0., 13.), pos + egui::vec2(0., 13.)],
-                egui::Stroke::new(1., egui::Color32::WHITE),
+                egui::Stroke::new(1.0_f32, egui::Color32::WHITE),
             );
         }
         if response.clicked() {
@@ -1244,7 +1302,7 @@ impl StarApp {
         painter.circle_stroke(
             compass,
             15.,
-            egui::Stroke::new(1., egui::Color32::from_white_alpha(140)),
+            egui::Stroke::new(1.0_f32, egui::Color32::from_white_alpha(140)),
         );
         painter.text(
             compass,
@@ -1258,13 +1316,14 @@ impl StarApp {
 
 impl eframe::App for StarApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.poll_analysis();
         self.poll_discovery();
         self.poll_export();
         self.poll_import();
         self.topbar(ctx);
         self.left_panel(ctx);
         self.right_panel(ctx);
-        egui::CentralPanel::default().frame(egui::Frame::none().fill(BG).inner_margin(egui::Margin::same(8))).show(ctx,|ui|{
+        egui::CentralPanel::default().frame(egui::Frame::NONE.fill(BG).inner_margin(egui::Margin::same(8))).show(ctx,|ui|{
             if self.page==Page::Overview {ui.heading("Mission Overview");ui.label("Spatio-Temporal & Physical Analog Discovery");ui.add_space(15.);ui.label("Load a projected Earth DEM, derive terrain fingerprints, and compare physical surface characteristics with lunar and Martian target regions.");if ui.button("Open Terrain Workspace").clicked(){self.page=Page::Terrain;}}
             else if self.page==Page::Discovery { self.discovery_view(ui, ctx); }
             else {self.map_view(ui,ctx);}
@@ -1290,7 +1349,7 @@ fn main() -> eframe::Result<()> {
             v.extreme_bg_color = BG;
             v.faint_bg_color = PANEL_2;
             v.selection.bg_fill = egui::Color32::from_rgb(29, 91, 79);
-            v.selection.stroke = egui::Stroke::new(1., GREEN);
+            v.selection.stroke = egui::Stroke::new(1.0_f32, GREEN);
             v.widgets.noninteractive.bg_fill = PANEL;
             v.widgets.inactive.bg_fill = PANEL_2;
             v.widgets.hovered.bg_fill = egui::Color32::from_rgb(23, 57, 72);
