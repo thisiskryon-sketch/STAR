@@ -37,7 +37,7 @@ The current implementation combines **terrain analysis** with an integrated **pl
   - surface roughness;
   - curvature proxy.
 - Batch processing of raster cells and coverage reporting.
-- Terrain visualizations, including an elevation map, elevation profile and elevation distribution.
+- Terrain workspace layers for elevation, hillshade, slope, roughness and a curvature proxy, plus a map and a profile across the middle raster row. There is no elevation-distribution chart.
 - Synthetic DEM generation for testing the workflow without external datasets.
 - Import of prepared terrain data through a source manifest, with skipped records and provenance retained by the importer.
 - Low-sun obstruction measurements at 1, 2 and 3 degrees when the DEM has the required 3 km padding and sufficient valid samples.
@@ -75,7 +75,6 @@ cd STAR
 Build and test:
 
 ```bash
-cargo fmt --check
 cargo test --workspace
 cargo build --release
 ```
@@ -103,15 +102,15 @@ Source DEMs for all six lunar targets and six Earth regions have been downloaded
 3. Use **Load GeoTIFF** to select a DEM file.
 4. Inspect the raster metadata and elevation visualization.
 5. Set the analysis neighborhood radius.
-6. Run terrain analysis and inspect the resulting terrain fingerprints and coverage statistics.
+6. Run terrain analysis to calculate terrain fingerprints. The batch report shows valid sample count, coverage, skipped cells and mean elevation; it does not display a per-cell fingerprint table. Click a map cell to inspect its elevation, slope, roughness and curvature proxy in the Point Inspector.
 
 ### GeoTIFF requirements
 
-The current metric terrain-analysis pipeline expects:
+For metric terrain analysis, prepare the DEM with:
 
 - a single-band elevation raster;
 - a **projected CRS** with linear units (normally metres);
-- north-up raster orientation;
+- north-up raster orientation (the current loader does not validate raster rotation/orientation, so confirm this before loading);
 - square pixels.
 
 Geographic coordinate systems such as **EPSG:4326** store coordinates in degrees and are not suitable for the current metric calculations. Reproject such rasters before loading them.

@@ -867,6 +867,7 @@ impl StarApp {
                                     Self::detail(ui, "Mean elevation", format!("{mean:.1} m"));
                                 }
                                 ui.label(egui::RichText::new(format!("Raster: {} × {} px · neighborhood: {} px", report.width, report.height, report.radius_cells)).size(9.).color(MUTED));
+                                ui.label(egui::RichText::new("Batch summary only. Click a map cell to inspect its elevation, slope, roughness and curvature proxy.").size(9.).color(MUTED));
                             }
                             ui.horizontal(|ui| {
                                 ui.label(
